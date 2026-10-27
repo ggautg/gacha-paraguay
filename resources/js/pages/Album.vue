@@ -26,13 +26,15 @@ const filters = computed(() => {
     const byRarity = player.value?.stats?.by_rarity ?? {};
 
     return [
-        { key: 'all', label: 'Todas', owned: ownedCount.value, total: props.characters.length, color: '#eec25f' },
+        { key: 'all', label: 'Todas', owned: ownedCount.value, total: props.characters.length, rarity: 'all' },
         ...RARITY_ORDER.map((rarity) => ({
             key: String(rarity),
             label: rarityMeta(rarity).label,
             owned: byRarity[rarity]?.owned ?? 0,
             total: byRarity[rarity]?.total ?? 0,
+            rarity,
             color: rarityMeta(rarity).color,
+            border: rarityMeta(rarity).border,
         })),
     ];
 });
@@ -81,7 +83,7 @@ const dashOffset = computed(() => circumference - (completion.value / 100) * cir
                             v-for="item in filters.slice(1)"
                             :key="item.key"
                             class="chip"
-                            :style="{ borderColor: `${item.color}40`, color: item.color }"
+                            :style="{ borderColor: item.border, color: item.color }"
                         >
                             <RarityStars :rarity="Number(item.key)" />
                             {{ item.owned }}/{{ item.total }}
@@ -131,9 +133,9 @@ const dashOffset = computed(() => circumference - (completion.value / 100) * cir
                         v-for="item in filters"
                         :key="item.key"
                         type="button"
-                        class="rounded-full border px-3 py-1.5 text-[11px] font-semibold transition"
-                        :class="filter === item.key ? 'text-night-950' : 'border-white/10 bg-white/[0.03] text-bone-300 hover:border-white/25'"
-                        :style="filter === item.key ? { backgroundColor: item.color, borderColor: item.color } : {}"
+                        class="filter-chip rounded-full border px-3 py-1.5 text-[11px] font-semibold transition"
+                        :class="filter === item.key ? 'filter-chip-active' : 'border-white/10 bg-white/[0.03] text-bone-300 hover:border-white/25'"
+                        :data-rarity="item.rarity"
                         @click="filter = item.key"
                     >
                         {{ item.label }}

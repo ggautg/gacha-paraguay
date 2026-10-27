@@ -6,9 +6,12 @@ import RarityStars from './RarityStars.vue';
 
 const props = defineProps({
     pull: { type: Object, required: true },
+    price: { type: Number, default: 0 },
+    canAgain: { type: Boolean, default: true },
+    busy: { type: Boolean, default: false },
 });
 
-const emit = defineEmits(['close']);
+const emit = defineEmits(['close', 'again']);
 
 const results = computed(() => props.pull?.results ?? []);
 const summary = computed(() => props.pull?.summary ?? {});
@@ -18,6 +21,14 @@ const hasLegendary = computed(() => results.value.some((result) => result.rarity
 
 function close() {
     emit('close');
+}
+
+function again() {
+    if (!props.canAgain || props.busy) {
+        return;
+    }
+
+    emit('again');
 }
 
 function onKeydown(event) {
@@ -77,7 +88,7 @@ onBeforeUnmount(() => {
                         :class="{ 'legendary-card': result.rarity === 3 }"
                         :style="{
                             animationDelay: `${index * 80}ms`,
-                            borderColor: `${rarityMeta(result.rarity).color}66`,
+                            borderColor: rarityMeta(result.rarity).border,
                             boxShadow: `0 24px 70px -34px ${rarityMeta(result.rarity).glow}`,
                         }"
                     >
@@ -109,7 +120,7 @@ onBeforeUnmount(() => {
                                     :style="{
                                         color: rarityMeta(result.rarity).color,
                                         backgroundColor: rarityMeta(result.rarity).soft,
-                                        border: `1px solid ${rarityMeta(result.rarity).color}55`,
+                                        border: `1px solid ${rarityMeta(result.rarity).border}`,
                                     }"
                                 >
                                     {{ rarityMeta(result.rarity).label }}
@@ -133,7 +144,9 @@ onBeforeUnmount(() => {
                         <div class="flex items-center justify-between gap-2 border-t border-white/[0.06] px-2.5 py-1.5 text-[9px]">
                             <span v-if="result.is_new" class="font-semibold uppercase tracking-wider text-gold-300">Primera copia</span>
                             <span v-else class="font-medium text-bone-400">Duplicado</span>
-                            <span v-if="!result.is_new" class="tabular-nums text-gold-300">+{{ formatCoins(result.refund) }}</span>
+                            <span v-if="!result.is_new" class="tabular-nums text-gold-300">
+                                +{{ formatCoins(result.refund) }} <span class="text-bone-400">({{ result.refund_percent }} %)</span>
+                            </span>
                         </div>
                     </article>
                 </div>
@@ -163,9 +176,25 @@ onBeforeUnmount(() => {
                         <span v-if="summary.refund > 0">Recuperaste <strong class="text-gold-300">{{ formatCoins(summary.refund) }}</strong></span>
                         <span>Saldo <strong class="text-gold-200">{{ formatCoins(summary.coins) }}</strong></span>
                     </div>
-                    <button type="button" class="btn-gold w-full px-8 py-2.5 text-sm sm:w-auto" @click="close">
-                        Continuar
-                    </button>
+                    <div class="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
+                        <button
+                            type="button"
+                            class="btn-ghost px-5 py-2.5 text-sm"
+                            :class="{ 'opacity-50': !canAgain }"
+                            :disabled="busy || !canAgain"
+                            :title="canAgain ? `Repetir la tirada por ${formatCoins(price)}` : 'No te alcanza el saldo para repetir'"
+                            @click="again"
+                        >
+                            <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8">
+                                <path d="M20 11a8 8 0 10-2.34 5.66M20 4v7h-7" stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                            <span>Tirar de vuelta ×{{ results.length }}</span>
+                            <span class="text-[11px] tabular-nums text-bone-400">{{ formatCoins(price) }}</span>
+                        </button>
+                        <button type="button" class="btn-gold w-full px-8 py-2.5 text-sm sm:w-auto" @click="close">
+                            Continuar
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>

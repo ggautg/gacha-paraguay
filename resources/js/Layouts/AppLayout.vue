@@ -2,6 +2,7 @@
 import { Link, usePage } from '@inertiajs/vue3';
 import { computed, onBeforeUnmount, ref, watch } from 'vue';
 import CoinChip from '../Components/CoinChip.vue';
+import ThemePicker from '../Components/ThemePicker.vue';
 
 const page = usePage();
 const player = computed(() => page.props.player);
@@ -35,7 +36,7 @@ function isActive(href) {
 
 <template>
     <div class="flex min-h-screen flex-col">
-        <div class="h-[3px] w-full bg-gradient-to-r from-flag-red via-bone-100 to-flag-blue" />
+        <div class="flag-stripe h-[3px] w-full" />
 
         <header class="sticky top-0 z-40 border-b border-white/[0.08] bg-night-950/80 backdrop-blur-xl">
             <div class="mx-auto flex h-16 max-w-6xl items-center justify-between gap-3 px-4 sm:px-6">
@@ -56,14 +57,14 @@ function isActive(href) {
                     <Link
                         href="/"
                         class="rounded-full px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wider transition sm:px-4 sm:text-xs"
-                        :class="isActive('/') ? 'bg-gold-400 text-night-950 shadow-[0_6px_20px_-8px_rgba(238,194,95,0.9)]' : 'text-bone-300 hover:text-gold-300'"
+                        :class="isActive('/') ? 'nav-glow bg-gold-400 text-night-950' : 'text-bone-300 hover:text-gold-300'"
                     >
                         Máquina
                     </Link>
                     <Link
                         href="/coleccion"
                         class="rounded-full px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wider transition sm:px-4 sm:text-xs"
-                        :class="isActive('/coleccion') ? 'bg-gold-400 text-night-950 shadow-[0_6px_20px_-8px_rgba(238,194,95,0.9)]' : 'text-bone-300 hover:text-gold-300'"
+                        :class="isActive('/coleccion') ? 'nav-glow bg-gold-400 text-night-950' : 'text-bone-300 hover:text-gold-300'"
                     >
                         Colección
                     </Link>
@@ -97,16 +98,18 @@ function isActive(href) {
                     <a href="https://es.wikipedia.org" target="_blank" rel="noopener noreferrer" class="font-medium text-bone-200 underline decoration-gold-500/40 underline-offset-2 hover:text-gold-300">
                         Wikipedia en español
                     </a>
-                    · Contenido bajo licencia CC BY-SA.
+                    y otras fuentes · Contenido de Wikipedia bajo licencia CC BY-SA.
                 </p>
                 <p class="text-[10px] uppercase tracking-[0.25em] text-bone-400/60">Hecho en Paraguay · Edición Patria</p>
             </div>
         </footer>
 
+        <ThemePicker />
+
         <Transition name="toast">
             <div
                 v-if="toast"
-                class="fixed bottom-5 left-1/2 z-50 -translate-x-1/2 rounded-full border border-gold-400/40 bg-night-900/95 px-5 py-2.5 text-sm font-medium text-gold-200 shadow-[0_20px_60px_-20px_rgba(0,0,0,0.9)] backdrop-blur"
+                class="fixed bottom-20 left-1/2 z-50 -translate-x-1/2 rounded-full border border-gold-400/40 bg-night-900/95 px-5 py-2.5 text-sm font-medium text-gold-200 shadow-[0_20px_60px_-20px_rgba(0,0,0,0.9)] backdrop-blur sm:bottom-5"
             >
                 {{ toast }}
             </div>

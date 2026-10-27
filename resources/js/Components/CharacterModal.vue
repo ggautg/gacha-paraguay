@@ -12,6 +12,23 @@ const emit = defineEmits(['close']);
 
 const visible = ref(false);
 const meta = computed(() => (props.character ? rarityMeta(props.character.rarity) : rarityMeta(1)));
+const linkLabel = computed(() => {
+    const url = props.character?.wiki_url ?? '';
+
+    if (!url) {
+        return '';
+    }
+
+    if (url.includes('wikipedia.org')) {
+        return 'Leer el artículo completo en Wikipedia';
+    }
+
+    try {
+        return `Ver más en ${new URL(url).hostname.replace(/^www\./, '')}`;
+    } catch {
+        return 'Ver más información';
+    }
+});
 
 function onKeydown(event) {
     if (event.key === 'Escape') {
@@ -53,7 +70,7 @@ onBeforeUnmount(() => {
 
                 <div
                     class="relative z-10 flex max-h-[92vh] w-full max-w-3xl flex-col overflow-hidden rounded-t-3xl border bg-night-900 shadow-[0_40px_120px_-40px_rgba(0,0,0,1)] sm:rounded-3xl md:grid md:grid-cols-[300px_1fr]"
-                    :style="{ borderColor: `${meta.color}55` }"
+                    :style="{ borderColor: meta.border }"
                 >
                     <button
                         type="button"
@@ -78,7 +95,7 @@ onBeforeUnmount(() => {
                         <div class="absolute inset-0 bg-gradient-to-t from-night-900 via-transparent to-transparent md:bg-gradient-to-r" />
                         <div
                             class="absolute bottom-4 left-4 rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] backdrop-blur"
-                            :style="{ color: meta.color, backgroundColor: meta.soft, border: `1px solid ${meta.color}55` }"
+                            :style="{ color: meta.color, backgroundColor: meta.soft, border: `1px solid ${meta.border}` }"
                         >
                             {{ meta.label }} · {{ character.rarity }}★
                         </div>
@@ -109,12 +126,13 @@ onBeforeUnmount(() => {
                             </p>
 
                             <a
+                                v-if="character.wiki_url"
                                 :href="character.wiki_url"
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 class="mt-6 inline-flex items-center gap-2 text-xs font-semibold text-gold-300 transition hover:text-gold-200"
                             >
-                                Leer el artículo completo en Wikipedia
+                                {{ linkLabel }}
                                 <svg viewBox="0 0 24 24" class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2">
                                     <path d="M7 17L17 7M9 7h8v8" stroke-linecap="round" stroke-linejoin="round" />
                                 </svg>

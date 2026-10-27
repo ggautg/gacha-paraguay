@@ -7,6 +7,7 @@ use App\Models\CollectionEntry;
 use App\Models\Player;
 use App\Models\Pull;
 use App\Support\GachaPresenter;
+use App\Support\Salary;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -32,7 +33,7 @@ class GachaService
 
             if ($player->coins < $price) {
                 throw ValidationException::withMessages([
-                    'coins' => 'No te alcanzan las monedas. Reclamá la bonificación o volvé más tarde.',
+                    'coins' => 'No te alcanza el sueldo: esta tirada cuesta '.Salary::format($price).' ('.Salary::guaranies($price).'). Reclamá la bonificación o volvé más tarde.',
                 ]);
             }
 
@@ -66,6 +67,7 @@ class GachaService
 
                 $isNew = ! $entry->exists;
                 $refund = 0;
+                $refundPercent = 0;
 
                 if ($isNew) {
                     $entry->quantity = 1;
@@ -74,6 +76,7 @@ class GachaService
                 } else {
                     $entry->increment('quantity');
                     $refund = $player->duplicateRefund($rarity);
+                    $refundPercent = $player->duplicateRefundPercent($rarity);
                     $refundTotal += $refund;
                 }
 
@@ -88,7 +91,7 @@ class GachaService
                     'is_new' => $isNew,
                 ]);
 
-                $results[] = GachaPresenter::reveal($character, $entry, $isNew, $refund);
+                $results[] = GachaPresenter::reveal($character, $entry, $isNew, $refund, $refundPercent);
             }
 
             $player->coins = $coins + $refundTotal;

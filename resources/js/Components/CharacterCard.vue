@@ -18,7 +18,7 @@ const meta = computed(() => rarityMeta(props.character.rarity));
         type="button"
         class="group relative w-full overflow-hidden rounded-2xl border bg-night-850 text-left transition duration-300 hover:-translate-y-1 hover:shadow-[0_24px_60px_-30px_rgba(0,0,0,0.95)] focus:outline-none focus-visible:ring-2 focus-visible:ring-gold-400/70"
         :style="{
-            borderColor: character.owned ? `${meta.color}55` : 'rgba(255,255,255,0.08)',
+            borderColor: character.owned ? meta.border : 'rgba(255,255,255,0.08)',
             boxShadow: character.owned ? `inset 0 1px 0 rgba(255,255,255,0.06), 0 20px 50px -38px ${meta.color}` : 'none',
         }"
         @click="$emit('select', character)"
@@ -42,7 +42,7 @@ const meta = computed(() => rarityMeta(props.character.rarity));
             <div class="absolute inset-x-2.5 top-2.5 flex items-start justify-between gap-1">
                 <span
                     class="rounded-full px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.14em] backdrop-blur"
-                    :style="{ color: meta.color, backgroundColor: meta.soft, border: `1px solid ${meta.color}44` }"
+                    :style="{ color: meta.color, backgroundColor: meta.soft, border: `1px solid ${meta.border}` }"
                 >
                     {{ meta.label }}
                 </span>

@@ -2,6 +2,9 @@ import '../css/app.css';
 
 import { createApp, h } from 'vue';
 import { createInertiaApp } from '@inertiajs/vue3';
+import { initTheme } from './lib/themes';
+
+initTheme();
 
 const pages = import.meta.glob('./pages/**/*.vue');
 

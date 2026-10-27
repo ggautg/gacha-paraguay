@@ -6,7 +6,7 @@ import CoinChip from '../Components/CoinChip.vue';
 import PortraitFallback from '../Components/PortraitFallback.vue';
 import PullReveal from '../Components/PullReveal.vue';
 import RarityStars from '../Components/RarityStars.vue';
-import { RARITY_ORDER, formatCoins, formatNumber, rarityMeta } from '../lib/rarity';
+import { RARITY_ORDER, formatCoins, formatGuaranies, formatNumber, rarityMeta } from '../lib/rarity';
 
 defineProps({
     recent: { type: Array, default: () => [] },
@@ -92,6 +92,20 @@ const canSingle = computed(() => (player.value?.coins ?? 0) >= (gacha.value?.pri
 const canMulti = computed(() => (player.value?.coins ?? 0) >= (gacha.value?.price_multi ?? 0));
 const nextLegendary = computed(() => Math.max(1, (player.value?.pity_limit ?? 12) - (player.value?.pity ?? 0)));
 
+const revealCount = computed(() => ((page.props.lastPull?.results?.length ?? 1) > 1 ? (gacha.value?.multi_pull ?? 10) : 1));
+const revealPrice = computed(() => (revealCount.value === 1 ? gacha.value?.price_single : gacha.value?.price_multi) ?? 0);
+const canAgain = computed(() => (player.value?.coins ?? 0) >= revealPrice.value);
+
+function pullAgain() {
+    if (pulling.value || !canAgain.value) {
+        return;
+    }
+
+    const count = revealCount.value;
+    showReveal.value = false;
+    pull(count);
+}
+
 const rates = computed(() => RARITY_ORDER.map((rarity) => ({
     rarity,
     meta: rarityMeta(rarity),
@@ -107,6 +121,10 @@ const rates = computed(() => RARITY_ORDER.map((rarity) => ({
         <PullReveal
             v-if="showReveal && page.props.lastPull"
             :pull="page.props.lastPull"
+            :price="revealPrice"
+            :can-again="canAgain"
+            :busy="pulling !== null"
+            @again="pullAgain"
             @close="showReveal = false"
         />
 
@@ -147,7 +165,7 @@ const rates = computed(() => RARITY_ORDER.map((rarity) => ({
                                 <path d="M4 8.5V6a2 2 0 012-2h12a2 2 0 012 2v2.5M4 8.5v9a2 2 0 002 2h12a2 2 0 002-2v-9M4 8.5h16M9 12h6M9 15.5h6" stroke-linecap="round" stroke-linejoin="round" />
                             </svg>
                             <span>Tirar ×{{ gacha.multi_pull }}</span>
-                            <span class="rounded-md bg-night-950/15 px-2 py-0.5 text-[11px] font-bold tabular-nums">₲ {{ formatNumber(gacha.price_multi) }}</span>
+                            <span class="rounded-md bg-night-950/15 px-2 py-0.5 text-[11px] font-bold tabular-nums">{{ formatCoins(gacha.price_multi) }}</span>
                         </button>
 
                         <button
@@ -160,9 +178,15 @@ const rates = computed(() => RARITY_ORDER.map((rarity) => ({
                                 <circle cx="12" cy="12" r="8" /><path d="M12 8v8M8 12h8" stroke-linecap="round" />
                             </svg>
                             <span>{{ pulling === 1 ? 'Invocando…' : 'Tirar ×1' }}</span>
-                            <span class="text-[11px] tabular-nums text-bone-400">₲ {{ formatNumber(gacha.price_single) }}</span>
+                            <span class="text-[11px] tabular-nums text-bone-400">{{ formatCoins(gacha.price_single) }}</span>
                         </button>
                     </div>
+
+                    <p class="mt-3 max-w-xl text-[10px] leading-relaxed text-bone-400">
+                        <span class="font-semibold text-gold-300/90">1 SM = {{ formatGuaranies(gacha.salary.amount) }}</span>
+                        · Sueldo mínimo legal vigente desde el {{ gacha.salary.since }} ({{ gacha.salary.decree }}).
+                        Jornal diario: {{ formatGuaranies(gacha.salary.daily) }}.
+                    </p>
 
                     <div class="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2">
                         <button
@@ -317,7 +341,7 @@ const rates = computed(() => RARITY_ORDER.map((rarity) => ({
                             v-for="character in showcase"
                             :key="character.id"
                             class="relative aspect-[3/4] overflow-hidden rounded-lg border bg-night-850"
-                            :style="{ borderColor: `${rarityMeta(character.rarity).color}44` }"
+                            :style="{ borderColor: rarityMeta(character.rarity).border }"
                         >
                             <img
                                 v-if="character.image"
@@ -357,7 +381,7 @@ const rates = computed(() => RARITY_ORDER.map((rarity) => ({
                         <li v-for="item in recent.slice(0, 4)" :key="item.id" class="flex items-center gap-2.5">
                             <span
                                 class="relative h-9 w-9 shrink-0 overflow-hidden rounded-full border"
-                                :style="{ borderColor: `${rarityMeta(item.rarity).color}66` }"
+                                :style="{ borderColor: rarityMeta(item.rarity).border }"
                             >
                                 <img v-if="item.image" :src="item.image" :alt="item.name" class="h-full w-full object-cover object-top" />
                                 <PortraitFallback v-else :name="item.name" owned />
@@ -382,7 +406,7 @@ const rates = computed(() => RARITY_ORDER.map((rarity) => ({
                 <div class="paper-noise absolute inset-0 opacity-40" />
                 <div class="relative flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
                     <div>
-                        <p class="eyebrow">51 sellos · 3 rarezas</p>
+                        <p class="eyebrow">{{ player?.stats?.total }} sellos · 3 rarezas</p>
                         <h2 class="mt-1.5 font-display text-xl text-bone-50 sm:text-2xl">¿Ya viste tu colección completa?</h2>
                         <p class="mt-1 text-xs text-bone-300">Los retratos se revelan a medida que los descubrís.</p>
                     </div>

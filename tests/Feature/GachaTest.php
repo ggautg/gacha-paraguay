@@ -15,12 +15,12 @@ class GachaTest extends TestCase
 {
     use RefreshDatabase;
 
-    private function makePlayer(int $coins = 1500, int $pity = 0): Player
+    private function makePlayer(?int $coins = null, int $pity = 0): Player
     {
         return Player::query()->create([
             'token' => (string) Str::uuid(),
             'name' => 'Test',
-            'coins' => $coins,
+            'coins' => $coins ?? (int) config('gachapon.economy.starting_coins'),
             'pity' => $pity,
         ]);
     }
@@ -51,7 +51,7 @@ class GachaTest extends TestCase
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
                 ->component('Home')
-                ->where('player.coins', 1500)
+                ->where('player.coins', (int) config('gachapon.economy.starting_coins'))
                 ->where('player.stats.total', 3)
                 ->has('recent', 0)
             );
@@ -81,22 +81,25 @@ class GachaTest extends TestCase
         $result = app(GachaService::class)->pull($player, 1);
 
         $this->assertCount(1, $result['results']);
-        $this->assertSame(1400, $player->refresh()->coins);
+        $this->assertSame(
+            (int) config('gachapon.economy.starting_coins') - (int) config('gachapon.economy.price_single'),
+            $player->refresh()->coins
+        );
         $this->assertSame(1, $player->total_pulls);
         $this->assertDatabaseCount('pulls', 1);
         $this->assertDatabaseCount('collection_entries', 1);
     }
 
-    public function test_multi_pull_uses_the_discounted_price(): void
+    public function test_multi_pull_charges_the_multi_price(): void
     {
         $this->seedCharacters();
-        $player = $this->makePlayer();
+        $player = $this->makePlayer(coins: (int) config('gachapon.economy.price_multi'));
 
         $result = app(GachaService::class)->pull($player, 10);
 
         $this->assertCount(10, $result['results']);
-        $this->assertSame(900, $result['summary']['spent']);
-        $this->assertSame(1500 - 900 + $result['summary']['refund'], $player->refresh()->coins);
+        $this->assertSame((int) config('gachapon.economy.price_multi'), $result['summary']['spent']);
+        $this->assertSame($result['summary']['refund'], $player->refresh()->coins);
         $this->assertSame(10, $player->total_pulls);
         $this->assertDatabaseCount('pulls', 10);
     }
@@ -112,9 +115,19 @@ class GachaTest extends TestCase
         app(GachaService::class)->pull($player, 1);
         $result = app(GachaService::class)->pull($player, 1);
 
+        $refund = (int) round(
+            (int) config('gachapon.economy.price_single') * (int) config('gachapon.economy.duplicate_refund_percent.1') / 100
+        );
+
         $this->assertFalse($result['results'][0]['is_new']);
-        $this->assertSame(20, $result['results'][0]['refund']);
-        $this->assertSame(1500 - 200 + 20, $player->refresh()->coins);
+        $this->assertSame($refund, $result['results'][0]['refund']);
+        $this->assertSame((int) config('gachapon.economy.duplicate_refund_percent.1'), $result['results'][0]['refund_percent']);
+        $this->assertSame(
+            (int) config('gachapon.economy.starting_coins')
+                - 2 * (int) config('gachapon.economy.price_single')
+                + $refund,
+            $player->refresh()->coins
+        );
         $this->assertSame(2, $player->collection()->first()->quantity);
     }
 
@@ -132,7 +145,7 @@ class GachaTest extends TestCase
     public function test_it_rejects_pulls_without_enough_coins(): void
     {
         $this->seedCharacters();
-        $player = $this->makePlayer(coins: 50);
+        $player = $this->makePlayer(coins: (int) config('gachapon.economy.price_single') - 1);
 
         $this->expectException(ValidationException::class);
 
@@ -155,15 +168,22 @@ class GachaTest extends TestCase
 
         $this->withCookie('gacha_player', $player->token)
             ->post('/bonificacion')
-            ->assertRedirect();
+            ->assertRedirect()
+            ->assertSessionHas('message', '¡Recibiste 1 SM (₲ 3.044.000)!');
 
-        $this->assertSame(2000, $player->refresh()->coins);
+        $this->assertSame(
+            (int) config('gachapon.economy.starting_coins') + (int) config('gachapon.economy.bonus_coins'),
+            $player->refresh()->coins
+        );
         $this->assertNotNull($player->bonus_claimed_at);
 
         $this->withCookie('gacha_player', $player->token)
             ->post('/bonificacion')
             ->assertSessionHasErrors('bonus');
 
-        $this->assertSame(2000, $player->refresh()->coins);
+        $this->assertSame(
+            (int) config('gachapon.economy.starting_coins') + (int) config('gachapon.economy.bonus_coins'),
+            $player->refresh()->coins
+        );
     }
 }

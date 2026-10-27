@@ -55,8 +55,15 @@ class Player extends Model
         return now()->greaterThanOrEqualTo($this->bonusReadyAt());
     }
 
+    public function duplicateRefundPercent(int $rarity): int
+    {
+        return (int) (config("gachapon.economy.duplicate_refund_percent.{$rarity}") ?? 0);
+    }
+
     public function duplicateRefund(int $rarity): int
     {
-        return (int) (config("gachapon.economy.duplicate_refund.{$rarity}") ?? 0);
+        $price = (int) config('gachapon.economy.price_single');
+
+        return (int) round($price * $this->duplicateRefundPercent($rarity) / 100);
     }
 }

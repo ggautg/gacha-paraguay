@@ -49,6 +49,12 @@ class HandleInertiaRequests extends Middleware
                 'price_multi' => (int) config('gachapon.economy.price_multi'),
                 'multi_pull' => (int) config('gachapon.multi_pull'),
                 'pity' => (int) config('gachapon.pity'),
+                'salary' => [
+                    'amount' => (int) config('gachapon.salary.amount'),
+                    'daily' => (int) config('gachapon.salary.daily'),
+                    'decree' => config('gachapon.salary.decree'),
+                    'since' => config('gachapon.salary.since'),
+                ],
             ],
             'flash' => [
                 'message' => fn () => $request->session()->get('message'),

@@ -58,12 +58,13 @@ class GachaPresenter
     /**
      * Resultado de una tirada, listo para la animación de revelado.
      */
-    public static function reveal(Character $character, ?CollectionEntry $entry, bool $isNew, int $refund): array
+    public static function reveal(Character $character, ?CollectionEntry $entry, bool $isNew, int $refund, int $refundPercent = 0): array
     {
         return [
             ...$character->toCard($entry),
             'is_new' => $isNew,
             'refund' => $refund,
+            'refund_percent' => $refundPercent,
         ];
     }
 }

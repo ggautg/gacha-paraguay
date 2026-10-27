@@ -32,6 +32,320 @@
     --color-flag-blue: #0038a8;
 }
 
+/* ---------------------------------------------------------------------------
+   Paletas de tema
+   Cada bloque pisa los tokens de color de `@theme` y el fondo del body.
+   Se aplican con `data-theme` en <html>.
+--------------------------------------------------------------------------- */
+:root {
+    --accent-rgb: 238 194 95;
+    --stripe-mid: #f2ecdd;
+    --selection-bg: rgb(238 194 95 / 0.28);
+    --gold-text-1: #fdf3d8;
+    --gold-text-2: #eec25f;
+    --gold-text-3: #b47f26;
+    --gold-text-4: #fbe8b4;
+    --rare-1-soft: rgb(159 179 200 / 0.12);
+    --rare-2-soft: rgb(78 195 255 / 0.12);
+    --rare-3-soft: rgb(245 200 92 / 0.14);
+    --rare-1-glow: rgb(159 179 200 / 0.35);
+    --rare-2-glow: rgb(78 195 255 / 0.4);
+    --rare-3-glow: rgb(245 200 92 / 0.45);
+    --rare-1-border: rgb(159 179 200 / 0.33);
+    --rare-2-border: rgb(78 195 255 / 0.33);
+    --rare-3-border: rgb(245 200 92 / 0.33);
+    --body-glow:
+        radial-gradient(1100px 620px at 12% -8%, rgb(238 194 95 / 0.13), transparent 62%),
+        radial-gradient(900px 520px at 92% 2%, rgb(0 56 168 / 0.22), transparent 66%),
+        radial-gradient(760px 700px at 50% 118%, rgb(213 43 30 / 0.1), transparent 62%);
+}
+
+/* 2. Claro — día paraguayo, papel y tinta */
+[data-theme='claro'] {
+    --color-night-950: #f4efe3;
+    --color-night-900: #ede7d8;
+    --color-night-850: #e7dfcd;
+    --color-night-800: #e0d7c1;
+    --color-night-700: #d0c4a8;
+    --color-night-600: #bcac8b;
+
+    --color-bone-50: #14201c;
+    --color-bone-100: #1e2b26;
+    --color-bone-200: #33423b;
+    --color-bone-300: #4c5b53;
+    --color-bone-400: #4f5f55;
+
+    --color-gold-100: #fffdf6;
+    --color-gold-200: #fdf1d3;
+    --color-gold-300: #7f5a10;
+    --color-gold-400: #d9a93f;
+    --color-gold-500: #b47f26;
+    --color-gold-600: #8a5f0c;
+
+    --color-rare-1: #46555f;
+    --color-rare-2: #085578;
+    --color-rare-3: #6e4b04;
+    --rare-1-soft: rgb(95 115 134 / 0.12);
+    --rare-2-soft: rgb(11 111 159 / 0.12);
+    --rare-3-soft: rgb(143 102 9 / 0.14);
+    --rare-1-glow: rgb(95 115 134 / 0.28);
+    --rare-2-glow: rgb(11 111 159 / 0.3);
+    --rare-3-glow: rgb(143 102 9 / 0.3);
+    --rare-1-border: rgb(95 115 134 / 0.35);
+    --rare-2-border: rgb(11 111 159 / 0.35);
+    --rare-3-border: rgb(143 102 9 / 0.35);
+
+    --accent-rgb: 217 169 63;
+    --stripe-mid: #ffffff;
+    --selection-bg: rgb(217 169 63 / 0.35);
+    --gold-text-1: #6f4a08;
+    --gold-text-2: #a97b1c;
+    --gold-text-3: #6b4706;
+    --gold-text-4: #c08f24;
+    --body-glow:
+        radial-gradient(1100px 620px at 12% -8%, rgb(217 169 63 / 0.22), transparent 62%),
+        radial-gradient(900px 520px at 92% 2%, rgb(0 56 168 / 0.1), transparent 66%),
+        radial-gradient(760px 700px at 50% 118%, rgb(213 43 30 / 0.08), transparent 62%);
+}
+
+/* 3. Tereré — yerba, guampa y monte */
+[data-theme='terere'] {
+    --color-night-950: #04100a;
+    --color-night-900: #07170f;
+    --color-night-850: #0a1f14;
+    --color-night-800: #0c2819;
+    --color-night-700: #113726;
+    --color-night-600: #184a33;
+
+    --color-bone-50: #f5faec;
+    --color-bone-100: #e8f1d8;
+    --color-bone-200: #cfdfae;
+    --color-bone-300: #b1c98c;
+    --color-bone-400: #92ab6f;
+
+    --color-gold-100: #f8ffe4;
+    --color-gold-200: #eaf9c4;
+    --color-gold-300: #d8ef98;
+    --color-gold-400: #bfe167;
+    --color-gold-500: #93bf42;
+    --color-gold-600: #6c942c;
+
+    --accent-rgb: 191 225 103;
+    --selection-bg: rgb(191 225 103 / 0.3);
+    --gold-text-1: #f8ffe4;
+    --gold-text-2: #bfe167;
+    --gold-text-3: #6c942c;
+    --gold-text-4: #d8ef98;
+    --body-glow:
+        radial-gradient(1100px 620px at 12% -8%, rgb(191 225 103 / 0.16), transparent 62%),
+        radial-gradient(900px 520px at 92% 2%, rgb(0 120 90 / 0.22), transparent 66%),
+        radial-gradient(760px 700px at 50% 118%, rgb(108 148 44 / 0.14), transparent 62%);
+}
+
+/* 4. Larissa Riquelme — rosa, oro y pasarela */
+[data-theme='larissa'] {
+    --color-night-950: #120410;
+    --color-night-900: #1a0716;
+    --color-night-850: #230b1e;
+    --color-night-800: #2d0f27;
+    --color-night-700: #3e1636;
+    --color-night-600: #521e48;
+
+    --color-bone-50: #fff1f7;
+    --color-bone-100: #ffdcea;
+    --color-bone-200: #f6bcd4;
+    --color-bone-300: #e598b7;
+    --color-bone-400: #c97897;
+
+    --color-gold-100: #fff6dd;
+    --color-gold-200: #ffe9b0;
+    --color-gold-300: #ffd77a;
+    --color-gold-400: #f5b93f;
+    --color-gold-500: #d1951f;
+    --color-gold-600: #a26f10;
+
+    --accent-rgb: 245 185 63;
+    --selection-bg: rgb(255 45 120 / 0.3);
+    --gold-text-1: #fff6dd;
+    --gold-text-2: #f5b93f;
+    --gold-text-3: #a26f10;
+    --gold-text-4: #ffd77a;
+    --body-glow:
+        radial-gradient(1100px 620px at 12% -8%, rgb(255 45 120 / 0.18), transparent 62%),
+        radial-gradient(900px 520px at 92% 2%, rgb(245 185 63 / 0.14), transparent 66%),
+        radial-gradient(760px 700px at 50% 118%, rgb(122 31 107 / 0.24), transparent 62%);
+}
+
+/* 5. Baila Conmigo — neón de estudio de baile */
+[data-theme='baila'] {
+    --color-night-950: #08040f;
+    --color-night-900: #0d0718;
+    --color-night-850: #120b22;
+    --color-night-800: #18102e;
+    --color-night-700: #221740;
+    --color-night-600: #302058;
+
+    --color-bone-50: #f7f1ff;
+    --color-bone-100: #eadeff;
+    --color-bone-200: #d0bcf8;
+    --color-bone-300: #b39aee;
+    --color-bone-400: #937bd4;
+
+    --color-gold-100: #fdf0ff;
+    --color-gold-200: #f9d8ff;
+    --color-gold-300: #f2b6ff;
+    --color-gold-400: #e17dff;
+    --color-gold-500: #bd4ee0;
+    --color-gold-600: #9130b3;
+
+    --accent-rgb: 225 125 255;
+    --selection-bg: rgb(225 125 255 / 0.3);
+    --gold-text-1: #fdf0ff;
+    --gold-text-2: #e17dff;
+    --gold-text-3: #9130b3;
+    --gold-text-4: #f2b6ff;
+    --body-glow:
+        radial-gradient(1100px 620px at 12% -8%, rgb(225 125 255 / 0.2), transparent 62%),
+        radial-gradient(900px 520px at 92% 2%, rgb(59 123 255 / 0.2), transparent 66%),
+        radial-gradient(760px 700px at 50% 118%, rgb(255 62 165 / 0.16), transparent 62%);
+}
+
+/* 6. Fútbol — Albirroja */
+[data-theme='futbol'] {
+    --color-night-950: #0a0305;
+    --color-night-900: #12060a;
+    --color-night-850: #180a10;
+    --color-night-800: #221016;
+    --color-night-700: #33161f;
+    --color-night-600: #4a1f2c;
+
+    --color-bone-50: #fff8f6;
+    --color-bone-100: #ffe9e4;
+    --color-bone-200: #f7c9c0;
+    --color-bone-300: #e8a69b;
+    --color-bone-400: #c4837a;
+
+    --color-gold-100: #fff6e0;
+    --color-gold-200: #ffe7b0;
+    --color-gold-300: #f9d47c;
+    --color-gold-400: #eab040;
+    --color-gold-500: #c68c1f;
+    --color-gold-600: #986710;
+
+    --accent-rgb: 234 176 64;
+    --selection-bg: rgb(225 29 47 / 0.32);
+    --gold-text-1: #fff6e0;
+    --gold-text-2: #eab040;
+    --gold-text-3: #986710;
+    --gold-text-4: #f9d47c;
+    --body-glow:
+        radial-gradient(1100px 620px at 12% -8%, rgb(225 29 47 / 0.2), transparent 62%),
+        radial-gradient(900px 520px at 92% 2%, rgb(10 47 143 / 0.28), transparent 66%),
+        radial-gradient(760px 700px at 50% 118%, rgb(234 176 64 / 0.12), transparent 62%);
+}
+
+/* 8. Asado — brasa, carbón y humo */
+[data-theme='asado'] {
+    --color-night-950: #0d0705;
+    --color-night-900: #150c08;
+    --color-night-850: #1d110b;
+    --color-night-800: #27170f;
+    --color-night-700: #3a2216;
+    --color-night-600: #4f2f1e;
+
+    --color-bone-50: #fff4e8;
+    --color-bone-100: #ffe4cc;
+    --color-bone-200: #f2c8a4;
+    --color-bone-300: #dba97f;
+    --color-bone-400: #b98a63;
+
+    --color-gold-100: #fff2d6;
+    --color-gold-200: #ffdda4;
+    --color-gold-300: #ffc46b;
+    --color-gold-400: #f9a03d;
+    --color-gold-500: #d97a1d;
+    --color-gold-600: #a85710;
+
+    --accent-rgb: 249 160 61;
+    --selection-bg: rgb(249 160 61 / 0.3);
+    --gold-text-1: #fff2d6;
+    --gold-text-2: #f9a03d;
+    --gold-text-3: #a85710;
+    --gold-text-4: #ffc46b;
+    --body-glow:
+        radial-gradient(1100px 620px at 12% -8%, rgb(249 160 61 / 0.18), transparent 62%),
+        radial-gradient(900px 520px at 92% 2%, rgb(168 87 16 / 0.26), transparent 66%),
+        radial-gradient(760px 700px at 50% 118%, rgb(217 65 30 / 0.16), transparent 62%);
+}
+
+/* 9. Mandioca — raíz, tierra y almidón */
+[data-theme='mandioca'] {
+    --color-night-950: #0e0b06;
+    --color-night-900: #15110a;
+    --color-night-850: #1d170d;
+    --color-night-800: #271f12;
+    --color-night-700: #382d1b;
+    --color-night-600: #4b3d26;
+
+    --color-bone-50: #fdf8ea;
+    --color-bone-100: #f6ecd0;
+    --color-bone-200: #e4d3aa;
+    --color-bone-300: #c9b383;
+    --color-bone-400: #a69063;
+
+    --color-gold-100: #fff8d9;
+    --color-gold-200: #f8e9a8;
+    --color-gold-300: #eed277;
+    --color-gold-400: #ddb84a;
+    --color-gold-500: #b8912a;
+    --color-gold-600: #8c6a17;
+
+    --accent-rgb: 221 184 74;
+    --selection-bg: rgb(221 184 74 / 0.3);
+    --gold-text-1: #fff8d9;
+    --gold-text-2: #ddb84a;
+    --gold-text-3: #8c6a17;
+    --gold-text-4: #eed277;
+    --body-glow:
+        radial-gradient(1100px 620px at 12% -8%, rgb(221 184 74 / 0.17), transparent 62%),
+        radial-gradient(900px 520px at 92% 2%, rgb(109 92 47 / 0.26), transparent 66%),
+        radial-gradient(760px 700px at 50% 118%, rgb(94 122 51 / 0.12), transparent 62%);
+}
+
+/* 10. Emo 2007 — negro, flequillo y rosa chicle */
+[data-theme='emo'] {
+    --color-night-950: #040407;
+    --color-night-900: #08080c;
+    --color-night-850: #0e0e13;
+    --color-night-800: #15151c;
+    --color-night-700: #1f1f28;
+    --color-night-600: #2c2c38;
+
+    --color-bone-50: #f8f8fb;
+    --color-bone-100: #e4e4ec;
+    --color-bone-200: #c6c6d2;
+    --color-bone-300: #a4a4b3;
+    --color-bone-400: #82828f;
+
+    --color-gold-100: #ffe9f6;
+    --color-gold-200: #ffc9e8;
+    --color-gold-300: #ff9dd6;
+    --color-gold-400: #ff5cbb;
+    --color-gold-500: #d6338f;
+    --color-gold-600: #a11c66;
+
+    --accent-rgb: 255 92 187;
+    --selection-bg: rgb(255 92 187 / 0.32);
+    --gold-text-1: #ffe9f6;
+    --gold-text-2: #ff5cbb;
+    --gold-text-3: #a11c66;
+    --gold-text-4: #ff9dd6;
+    --body-glow:
+        radial-gradient(1100px 620px at 12% -8%, rgb(255 92 187 / 0.17), transparent 62%),
+        radial-gradient(900px 520px at 92% 2%, rgb(70 70 90 / 0.35), transparent 66%),
+        radial-gradient(760px 700px at 50% 118%, rgb(166 28 102 / 0.2), transparent 62%);
+}
+
 @layer base {
     html {
         scroll-behavior: smooth;
@@ -39,18 +353,19 @@
 
     body {
         background-color: var(--color-night-950);
-        background-image:
-            radial-gradient(1100px 620px at 12% -8%, rgba(238, 194, 95, 0.13), transparent 62%),
-            radial-gradient(900px 520px at 92% 2%, rgba(0, 56, 168, 0.22), transparent 66%),
-            radial-gradient(760px 700px at 50% 118%, rgba(213, 43, 30, 0.1), transparent 62%);
+        background-image: var(--body-glow);
         background-attachment: fixed;
         color: var(--color-bone-100);
         font-family: var(--font-sans);
         -webkit-font-smoothing: antialiased;
     }
 
+    html.theme-ready body {
+        transition: background-color 0.35s ease, color 0.35s ease;
+    }
+
     ::selection {
-        background: rgba(238, 194, 95, 0.28);
+        background: var(--selection-bg);
     }
 
     ::-webkit-scrollbar {
@@ -89,11 +404,14 @@
     }
 
     .btn-gold {
-        @apply relative overflow-hidden bg-gradient-to-b from-gold-300 via-gold-400 to-gold-600 text-night-950 shadow-[0_10px_30px_-12px_rgba(238,194,95,0.8)];
+        @apply relative overflow-hidden bg-gradient-to-b from-gold-300 via-gold-400 to-gold-600 text-night-950;
+        box-shadow: 0 10px 30px -12px rgb(var(--accent-rgb) / 0.8);
     }
 
     .btn-gold:hover:not(:disabled) {
-        @apply -translate-y-0.5 shadow-[0_16px_40px_-14px_rgba(238,194,95,0.95)] brightness-105;
+        filter: brightness(1.05);
+        box-shadow: 0 16px 40px -14px rgb(var(--accent-rgb) / 0.95);
+        transform: translateY(-2px);
     }
 
     .btn-ghost {
@@ -108,8 +426,44 @@
         @apply inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs font-medium text-bone-200;
     }
 
+    .filter-chip-active {
+        background-color: var(--pill-bg);
+        border-color: var(--pill-border);
+        color: var(--pill-ink);
+    }
+
+    .filter-chip[data-rarity='all'] {
+        --pill-bg: var(--color-gold-400);
+        --pill-border: var(--color-gold-400);
+        --pill-ink: var(--color-night-950);
+    }
+
+    .filter-chip[data-rarity='1'] {
+        --pill-bg: var(--color-rare-1);
+        --pill-border: var(--color-rare-1);
+        --pill-ink: var(--color-night-950);
+    }
+
+    .filter-chip[data-rarity='2'] {
+        --pill-bg: var(--color-rare-2);
+        --pill-border: var(--color-rare-2);
+        --pill-ink: var(--color-night-950);
+    }
+
+    .filter-chip[data-rarity='3'] {
+        --pill-bg: var(--color-rare-3);
+        --pill-border: var(--color-rare-3);
+        --pill-ink: var(--color-night-950);
+    }
+
     .gold-text {
-        background: linear-gradient(100deg, #fdf3d8 10%, #eec25f 38%, #b47f26 62%, #fbe8b4 92%);
+        background: linear-gradient(
+            100deg,
+            var(--gold-text-1) 10%,
+            var(--gold-text-2) 38%,
+            var(--gold-text-3) 62%,
+            var(--gold-text-4) 92%
+        );
         -webkit-background-clip: text;
         background-clip: text;
         color: transparent;
@@ -118,6 +472,125 @@
     .divider {
         @apply h-px w-full bg-gradient-to-r from-transparent via-white/12 to-transparent;
     }
+
+    .flag-stripe {
+        background-image: linear-gradient(
+            90deg,
+            var(--color-flag-red) 0%,
+            var(--stripe-mid) 50%,
+            var(--color-flag-blue) 100%
+        );
+    }
+
+    .nav-glow {
+        box-shadow: 0 6px 20px -8px rgb(var(--accent-rgb) / 0.9);
+    }
+
+    .coin-glow {
+        box-shadow: 0 0 16px -4px rgb(var(--accent-rgb) / 0.9);
+    }
+}
+
+/* Ajustes del tema claro sobre superficies blancas translúcidas */
+[data-theme='claro'] .panel {
+    background-color: rgb(255 255 255 / 0.66);
+    border-color: rgb(20 40 34 / 0.12);
+    box-shadow: 0 20px 60px -32px rgb(71 60 25 / 0.4);
+}
+
+[data-theme='claro'] .btn-ghost {
+    border-color: rgb(20 40 34 / 0.18);
+    background-color: rgb(255 255 255 / 0.55);
+}
+
+[data-theme='claro'] .btn-ghost:hover {
+    background-color: rgb(255 255 255 / 0.85);
+}
+
+[data-theme='claro'] .chip {
+    border-color: rgb(20 40 34 / 0.16);
+    background-color: rgb(255 255 255 / 0.6);
+}
+
+[data-theme='claro'] .filter-chip[data-rarity='all'] {
+    --pill-ink: #2a1f06;
+}
+
+[data-theme='claro'] .filter-chip[data-rarity='1'] {
+    --pill-bg: #fffdf7;
+    --pill-border: var(--rare-1-border);
+    --pill-ink: var(--color-rare-1);
+}
+
+[data-theme='claro'] .filter-chip[data-rarity='2'] {
+    --pill-bg: #fffdf7;
+    --pill-border: var(--rare-2-border);
+    --pill-ink: var(--color-rare-2);
+}
+
+[data-theme='claro'] .filter-chip[data-rarity='3'] {
+    --pill-bg: #fffdf7;
+    --pill-border: var(--rare-3-border);
+    --pill-ink: var(--color-rare-3);
+}
+
+[data-theme='claro'] .btn-gold {
+    background-image: linear-gradient(to bottom, #f6dfa2, #e7c264, #cfa43c);
+    color: #2a1f06;
+    box-shadow: 0 10px 30px -12px rgb(120 90 20 / 0.55);
+}
+
+[data-theme='claro'] .btn-gold:hover:not(:disabled) {
+    box-shadow: 0 16px 40px -14px rgb(120 90 20 / 0.7);
+}
+
+[data-theme='claro'] .text-night-950 {
+    color: #2a1f06;
+}
+
+[data-theme='claro'] .eyebrow,
+[data-theme='claro'] .text-gold-400 {
+    color: #7c5409;
+}
+
+[data-theme='claro'] .text-gold-200 {
+    color: #8a5f0c;
+}
+
+[data-theme='claro'] [class*='text-gold-400/'] {
+    color: rgb(124 84 9 / 0.85);
+}
+
+[data-theme='claro'] [class*='hover:text-gold-200']:hover {
+    color: #8a5f0c;
+}
+
+[data-theme='claro'] .divider {
+    background-image: linear-gradient(to right, transparent, rgb(20 40 34 / 0.18), transparent);
+}
+
+[data-theme='claro'] [class*='border-white'] {
+    border-color: rgb(20 40 34 / 0.14);
+}
+
+[data-theme='claro'] [class*='bg-white/'] {
+    background-color: rgb(20 40 34 / 0.05);
+}
+
+[data-theme='claro'] [class*='text-white/'] {
+    color: rgb(20 40 34 / 0.18);
+}
+
+[data-theme='claro'] .paper-noise {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Cg fill='none' stroke='%2314201c' stroke-opacity='0.07'%3E%3Cpath d='M0 60h120M60 0v120'/%3E%3Ccircle cx='60' cy='60' r='22'/%3E%3Ccircle cx='60' cy='60' r='40'/%3E%3C/g%3E%3C/svg%3E");
+}
+
+[data-theme='claro'] [class*='text-[#ff9c8f]'] {
+    color: #b3261a;
+}
+
+[data-theme='claro'] .coin-badge {
+    background-image: linear-gradient(to bottom right, #f9e9bd, #d9a93f);
 }
 
 /* Textura sutil de sello/guarania para paneles */

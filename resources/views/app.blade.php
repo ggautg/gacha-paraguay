@@ -4,7 +4,33 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="theme-color" content="#05080b">
-    <meta name="description" content="Gachapón de personajes históricos del Paraguay: coleccioná 51 figuras con retratos y biografías de Wikipedia.">
+    <meta name="description" content="Gachapón de personajes históricos del Paraguay: coleccioná 63 figuras con retratos y biografías de Wikipedia.">
+
+    <script>
+        (function () {
+            try {
+                var theme = window.localStorage.getItem('gacha-theme');
+                var colors = {
+                    default: '#05080b',
+                    claro: '#f4efe3',
+                    terere: '#04100a',
+                    larissa: '#120410',
+                    baila: '#08040f',
+                    futbol: '#0a0305',
+                    asado: '#0d0705',
+                    mandioca: '#0e0b06',
+                    emo: '#040407'
+                };
+
+                if (theme && colors[theme]) {
+                    document.documentElement.setAttribute('data-theme', theme);
+                    document.querySelector('meta[name="theme-color"]').setAttribute('content', colors[theme]);
+                }
+            } catch (error) {
+                // Sin acceso a localStorage: se usa el tema por defecto.
+            }
+        })();
+    </script>
 
     <title inertia>Gacha Guaraní · Historia del Paraguay</title>
 

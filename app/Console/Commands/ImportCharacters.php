@@ -19,7 +19,8 @@ class ImportCharacters extends Command
     protected $signature = 'gacha:import
                             {--fresh : Borra el catálogo y todo el progreso antes de importar}
                             {--missing : Reintenta solo los retratos que faltan}
-                            {--no-images : Importa solo los datos de Wikipedia, sin retratos}';
+                            {--no-images : Importa solo los datos de Wikipedia, sin retratos}
+                            {--only= : Importa solo estos slugs, separados por coma}';
 
     protected $description = 'Importa los personajes históricos de Paraguay desde Wikipedia (nombre, retrato y biografía).';
 
@@ -37,8 +38,31 @@ class ImportCharacters extends Command
             return self::FAILURE;
         }
 
+        if ($this->option('fresh') && $this->option('only')) {
+            $this->error('--fresh y --only no se pueden combinar.');
+
+            return self::FAILURE;
+        }
+
+        if ($only = $this->option('only')) {
+            $slugs = collect(explode(',', $only))
+                ->map(fn (string $slug) => Str::slug(trim($slug)))
+                ->filter()
+                ->all();
+
+            $roster = $roster
+                ->filter(fn (array $spec) => in_array(Str::slug($spec['name']), $slugs, true))
+                ->values();
+
+            if ($roster->isEmpty()) {
+                $this->error('Ningún personaje coincide con --only.');
+
+                return self::FAILURE;
+            }
+        }
+
         if ($this->option('fresh')) {
-            if (! $this->confirm('Se borrarán el catálogo, las colecciones y las monedas de todos los jugadores. ¿Continuar?', true)) {
+            if (! $this->confirm('Se borrarán el catálogo, las colecciones y los saldos de todos los jugadores. ¿Continuar?', true)) {
                 return self::FAILURE;
             }
 
@@ -64,9 +88,17 @@ class ImportCharacters extends Command
         $onlyMissing = (bool) $this->option('missing');
 
         foreach ($roster->chunk(20) as $chunk) {
-            $pages = $this->fetchPages($chunk->pluck('wiki')->all());
+            $wikiTitles = $chunk->pluck('wiki')->filter()->values()->all();
+            $pages = $wikiTitles === [] ? [] : $this->fetchPages($wikiTitles);
 
             foreach ($chunk as $spec) {
+                if (blank($spec['wiki'] ?? null)) {
+                    $this->importCurated($spec, $withoutImage);
+                    $imported++;
+
+                    continue;
+                }
+
                 $page = $this->resolvePage($pages, $spec['wiki']);
 
                 if ($page === null) {
@@ -109,7 +141,9 @@ class ImportCharacters extends Command
                 $this->line("  ✓ {$spec['name']} <fg=yellow>[{$spec['rarity']}★]</>");
             }
 
-            usleep(250_000);
+            if ($wikiTitles !== []) {
+                usleep(250_000);
+            }
         }
 
         $this->newLine();
@@ -122,6 +156,39 @@ class ImportCharacters extends Command
         $this->info('Listo. Ejecutá `php artisan storage:link` si todavía no lo hiciste.');
 
         return self::SUCCESS;
+    }
+
+    /**
+     * Inserta o actualiza un personaje curado a mano (sin artículo de Wikipedia).
+     *
+     * @param  array<string, mixed>  $spec
+     */
+    private function importCurated(array $spec, int &$withoutImage): void
+    {
+        $slug = Str::slug($spec['name']);
+        $existing = Character::query()->where('slug', $slug)->first();
+        $imagePath = $existing?->image_path ?? ($spec['image'] ?? null);
+
+        if (! $imagePath) {
+            $withoutImage++;
+        }
+
+        Character::query()->updateOrCreate(
+            ['slug' => $slug],
+            [
+                'name' => $spec['name'],
+                'wiki_title' => $spec['name'],
+                'wiki_url' => $spec['link'] ?? '',
+                'image_path' => $imagePath,
+                'extract' => $spec['extract'] ?? null,
+                'role' => $spec['role'],
+                'era' => $spec['era'],
+                'category' => $spec['category'],
+                'rarity' => (int) $spec['rarity'],
+            ]
+        );
+
+        $this->line("  ✓ {$spec['name']} <fg=yellow>[{$spec['rarity']}★]</> <fg=gray>(curado)</>");
     }
 
     /**

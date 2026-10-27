@@ -27,7 +27,7 @@ return new class extends Migration
             $table->id();
             $table->uuid('token')->unique();
             $table->string('name')->default('Coleccionista');
-            $table->unsignedInteger('coins')->default(1500);
+            $table->unsignedBigInteger('coins')->default(9132000);
             $table->unsignedInteger('total_pulls')->default(0);
             $table->unsignedTinyInteger('pity')->default(0);
             $table->timestamp('bonus_claimed_at')->nullable();

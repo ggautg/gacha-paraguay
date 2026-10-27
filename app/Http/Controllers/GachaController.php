@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Character;
 use App\Models\Player;
 use App\Services\GachaService;
+use App\Support\Salary;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -76,7 +77,7 @@ class GachaController extends Controller
         $player->bonus_claimed_at = now();
         $player->save();
 
-        return back()->with('message', "¡Recibiste {$coins} monedas guaraníes!");
+        return back()->with('message', '¡Recibiste '.Salary::format($coins).' ('.Salary::guaranies($coins).')!');
     }
 
     private function player(Request $request): Player
