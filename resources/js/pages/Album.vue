@@ -94,7 +94,7 @@ const dashOffset = computed(() => circumference - (completion.value / 100) * cir
                 <div class="flex items-center gap-5">
                     <div class="relative h-28 w-28 shrink-0">
                         <svg viewBox="0 0 110 110" class="h-full w-full -rotate-90">
-                            <circle cx="55" cy="55" r="46" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="7" />
+                            <circle cx="55" cy="55" r="46" fill="none" style="stroke: var(--border-soft)" stroke-width="7" />
                             <circle
                                 cx="55"
                                 cy="55"
@@ -109,9 +109,9 @@ const dashOffset = computed(() => circumference - (completion.value / 100) * cir
                             />
                             <defs>
                                 <linearGradient id="ringGradient" x1="0" y1="0" x2="1" y2="1">
-                                    <stop offset="0%" stop-color="#b47f26" />
-                                    <stop offset="55%" stop-color="#eec25f" />
-                                    <stop offset="100%" stop-color="#fdf3d8" />
+                                    <stop offset="0%" style="stop-color: var(--accent-surface-3)" />
+                                    <stop offset="55%" style="stop-color: var(--accent-surface-2)" />
+                                    <stop offset="100%" style="stop-color: var(--accent-surface-1)" />
                                 </linearGradient>
                             </defs>
                         </svg>
@@ -126,7 +126,7 @@ const dashOffset = computed(() => circumference - (completion.value / 100) * cir
             </div>
         </section>
 
-        <section class="sticky top-16 z-30 border-y border-white/[0.07] bg-night-950/85 py-3 backdrop-blur-xl">
+        <section class="sticky top-16 z-30 border-y line-soft bg-night-950/85 py-3 backdrop-blur-xl">
             <div class="mx-auto flex max-w-6xl flex-col gap-3 px-4 sm:px-6 lg:flex-row lg:items-center lg:justify-between">
                 <div class="flex flex-wrap items-center gap-1.5">
                     <button
@@ -134,7 +134,7 @@ const dashOffset = computed(() => circumference - (completion.value / 100) * cir
                         :key="item.key"
                         type="button"
                         class="filter-chip rounded-full border px-3 py-1.5 text-[11px] font-semibold transition"
-                        :class="filter === item.key ? 'filter-chip-active' : 'border-white/10 bg-white/[0.03] text-bone-300 hover:border-white/25'"
+                        :class="filter === item.key ? 'filter-chip-active' : 'line-soft surface-2 text-bone-300 hover:line-strong'"
                         :data-rarity="item.rarity"
                         @click="filter = item.key"
                     >
@@ -147,7 +147,7 @@ const dashOffset = computed(() => circumference - (completion.value / 100) * cir
                     <button
                         type="button"
                         class="rounded-full border px-3 py-1.5 text-[11px] font-semibold transition"
-                        :class="onlyOwned ? 'border-gold-400/50 bg-gold-400/15 text-gold-200' : 'border-white/10 bg-white/[0.03] text-bone-400 hover:text-bone-200'"
+                        :class="onlyOwned ? 'border-gold-400/50 bg-gold-400/15 text-gold-200' : 'line-soft surface-2 text-bone-400 hover:text-bone-200'"
                         @click="onlyOwned = !onlyOwned"
                     >
                         Solo descubiertos
@@ -162,7 +162,7 @@ const dashOffset = computed(() => circumference - (completion.value / 100) * cir
                             v-model="search"
                             type="search"
                             placeholder="Buscar por nombre, rol o época…"
-                            class="w-full rounded-full border border-white/10 bg-white/[0.04] py-2 pl-9 pr-3 text-xs text-bone-100 placeholder:text-bone-400/70 focus:border-gold-400/50 focus:outline-none focus:ring-1 focus:ring-gold-400/40"
+                            class="w-full rounded-full border line-soft surface-2 py-2 pl-9 pr-3 text-xs text-bone-100 placeholder:text-bone-400/70 focus:border-gold-400/50 focus:outline-none focus:ring-1 focus:ring-gold-400/40"
                         />
                     </label>
                 </div>
@@ -179,7 +179,7 @@ const dashOffset = computed(() => circumference - (completion.value / 100) * cir
                 />
             </div>
 
-            <div v-else class="flex flex-col items-center justify-center rounded-2xl border border-dashed border-white/12 px-6 py-20 text-center">
+            <div v-else class="flex flex-col items-center justify-center rounded-2xl border border-dashed line-soft px-6 py-20 text-center">
                 <span class="grid h-12 w-12 place-items-center rounded-full border border-gold-400/30 bg-gold-400/10 font-display text-lg text-gold-300">?</span>
                 <p class="mt-4 font-display text-lg text-bone-100">No encontramos figuras</p>
                 <p class="mt-1 max-w-sm text-xs leading-relaxed text-bone-400">

@@ -66,7 +66,7 @@ onBeforeUnmount(() => {
                 </div>
                 <button
                     type="button"
-                    class="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-white/15 bg-white/[0.04] text-bone-200 transition hover:border-gold-400/60 hover:text-gold-300"
+                    class="grid h-10 w-10 shrink-0 place-items-center rounded-full border line-strong surface-2 text-bone-200 transition hover:border-gold-400/60 hover:text-gold-300"
                     aria-label="Cerrar"
                     @click="close"
                 >
@@ -141,7 +141,7 @@ onBeforeUnmount(() => {
                             </div>
                         </div>
 
-                        <div class="flex items-center justify-between gap-2 border-t border-white/[0.06] px-2.5 py-1.5 text-[9px]">
+                        <div class="flex items-center justify-between gap-2 border-t line-soft px-2.5 py-1.5 text-[9px]">
                             <span v-if="result.is_new" class="font-semibold uppercase tracking-wider text-gold-300">Primera copia</span>
                             <span v-else class="font-medium text-bone-400">Duplicado</span>
                             <span v-if="!result.is_new" class="tabular-nums text-gold-300">
@@ -169,7 +169,7 @@ onBeforeUnmount(() => {
                 </div>
             </div>
 
-            <div class="relative border-t border-white/10 bg-night-950/80 px-4 py-4 sm:px-8">
+            <div class="relative border-t line-soft bg-night-950/80 px-4 py-4 sm:px-8">
                 <div class="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 sm:flex-row">
                     <div class="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-[11px] text-bone-400">
                         <span>Gastaste <strong class="text-bone-200">{{ formatCoins(summary.spent) }}</strong></span>

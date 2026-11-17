@@ -7,6 +7,7 @@ use App\Models\CollectionEntry;
 use App\Models\Player;
 use App\Models\Pull;
 use Illuminate\Console\Command;
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
@@ -200,20 +201,27 @@ class ImportCharacters extends Command
         $response = null;
 
         for ($attempt = 1; $attempt <= 4; $attempt++) {
-            $response = Http::withHeaders(['User-Agent' => self::USER_AGENT])
-                ->timeout(45)
-                ->get(self::API, [
-                    'action' => 'query',
-                    'format' => 'json',
-                    'formatversion' => 2,
-                    'prop' => 'pageimages|extracts',
-                    'exintro' => 1,
-                    'explaintext' => 1,
-                    'piprop' => 'thumbnail',
-                    'pithumbsize' => 900,
-                    'redirects' => 1,
-                    'titles' => implode('|', $titles),
-                ]);
+            try {
+                $response = Http::withHeaders(['User-Agent' => self::USER_AGENT])
+                    ->timeout(45)
+                    ->get(self::API, [
+                        'action' => 'query',
+                        'format' => 'json',
+                        'formatversion' => 2,
+                        'prop' => 'pageimages|extracts',
+                        'exintro' => 1,
+                        'explaintext' => 1,
+                        'piprop' => 'thumbnail',
+                        'pithumbsize' => 900,
+                        'redirects' => 1,
+                        'titles' => implode('|', $titles),
+                    ]);
+            } catch (ConnectionException $exception) {
+                $response = null;
+                usleep(600_000 * $attempt);
+
+                continue;
+            }
 
             if ($response->successful()) {
                 break;
@@ -272,13 +280,20 @@ class ImportCharacters extends Command
         $status = null;
 
         for ($attempt = 1; $attempt <= 4; $attempt++) {
-            $response = Http::withHeaders([
-                'User-Agent' => self::USER_AGENT,
-                'Accept' => 'image/avif,image/webp,image/apng,image/*,*/*;q=0.8',
-                'Referer' => 'https://es.wikipedia.org/',
-            ])
-                ->timeout(60)
-                ->get($url);
+            try {
+                $response = Http::withHeaders([
+                    'User-Agent' => self::USER_AGENT,
+                    'Accept' => 'image/avif,image/webp,image/apng,image/*,*/*;q=0.8',
+                    'Referer' => 'https://es.wikipedia.org/',
+                ])
+                    ->timeout(20)
+                    ->get($url);
+            } catch (ConnectionException $exception) {
+                $response = null;
+                usleep(500_000 * $attempt);
+
+                continue;
+            }
 
             if ($response->successful() && strlen($response->body()) > 1_000) {
                 return $this->storeImage($response, $url, $slug);

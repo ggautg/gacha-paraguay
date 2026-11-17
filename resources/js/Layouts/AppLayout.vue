@@ -38,7 +38,7 @@ function isActive(href) {
     <div class="flex min-h-screen flex-col">
         <div class="flag-stripe h-[3px] w-full" />
 
-        <header class="sticky top-0 z-40 border-b border-white/[0.08] bg-night-950/80 backdrop-blur-xl">
+        <header class="sticky top-0 z-40 border-b line-soft bg-night-950/80 backdrop-blur-xl">
             <div class="mx-auto flex h-16 max-w-6xl items-center justify-between gap-3 px-4 sm:px-6">
                 <Link href="/" class="group flex items-center gap-2.5">
                     <span class="relative grid h-10 w-10 place-items-center rounded-full bg-night-900 ring-1 ring-gold-400/40 transition group-hover:ring-gold-300/70">
@@ -53,7 +53,7 @@ function isActive(href) {
                     </span>
                 </Link>
 
-                <nav class="flex items-center gap-1 rounded-full border border-white/[0.08] bg-white/[0.03] p-1">
+                <nav class="flex items-center gap-1 rounded-full border line-soft surface-2 p-1">
                     <Link
                         href="/"
                         class="rounded-full px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wider transition sm:px-4 sm:text-xs"
@@ -72,7 +72,7 @@ function isActive(href) {
 
                 <div class="flex items-center gap-2">
                     <div v-if="player" class="hidden items-center gap-2 lg:flex">
-                        <div class="h-1.5 w-20 overflow-hidden rounded-full bg-white/10">
+                        <div class="h-1.5 w-20 overflow-hidden rounded-full surface-3">
                             <div
                                 class="h-full rounded-full bg-gradient-to-r from-gold-500 to-gold-300"
                                 :style="{ width: `${player.stats.completion}%` }"
@@ -91,7 +91,7 @@ function isActive(href) {
             <slot />
         </main>
 
-        <footer class="border-t border-white/[0.07] bg-night-950/60">
+        <footer class="border-t line-soft bg-night-950/60">
             <div class="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 px-4 py-6 text-center sm:flex-row sm:px-6 sm:text-left">
                 <p class="text-[11px] leading-relaxed text-bone-400">
                     Retratos y biografías tomados de

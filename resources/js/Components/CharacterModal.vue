@@ -74,7 +74,7 @@ onBeforeUnmount(() => {
                 >
                     <button
                         type="button"
-                        class="absolute right-3 top-3 z-20 grid h-9 w-9 place-items-center rounded-full border border-white/15 bg-night-950/70 text-bone-200 backdrop-blur transition hover:border-gold-400/60 hover:text-gold-300"
+                        class="absolute right-3 top-3 z-20 grid h-9 w-9 place-items-center rounded-full border line-strong bg-night-950/70 text-bone-200 backdrop-blur transition hover:border-gold-400/60 hover:text-gold-300"
                         aria-label="Cerrar"
                         @click="$emit('close')"
                     >
@@ -140,7 +140,7 @@ onBeforeUnmount(() => {
                         </template>
 
                         <template v-else>
-                            <div class="rounded-xl border border-dashed border-white/15 bg-white/[0.02] p-4 text-center">
+                            <div class="rounded-xl border border-dashed line-strong surface-2 p-4 text-center">
                                 <p class="font-display text-sm text-bone-200">Sello sin descubrir</p>
                                 <p class="mt-1 text-xs leading-relaxed text-bone-400">
                                     Este personaje todavía no está en tu colección. Tirá de la máquina para revelar su retrato y su historia.

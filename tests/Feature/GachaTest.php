@@ -34,10 +34,10 @@ class GachaTest extends TestCase
                 'wiki_title' => "Personaje {$rarity}",
                 'wiki_url' => "https://es.wikipedia.org/wiki/Personaje_{$rarity}",
                 'role' => 'Rol de prueba',
-                'era' => '1900 â€“ 1950',
+                'era' => '1900 – 1950',
                 'category' => 'Historia',
                 'rarity' => $rarity,
-                'extract' => 'BiografÃ­a de prueba.',
+                'extract' => 'Biografía de prueba.',
             ]);
         }
     }

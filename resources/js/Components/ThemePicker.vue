@@ -45,16 +45,16 @@ onBeforeUnmount(() => {
         <Transition name="theme-pop">
             <div
                 v-if="open"
-                class="absolute bottom-full right-0 mb-3 w-[19rem] overflow-hidden rounded-2xl border border-white/10 bg-night-900/95 shadow-[0_28px_80px_-30px_rgba(0,0,0,0.95)] backdrop-blur-xl"
+                class="absolute bottom-full right-0 mb-3 w-[19rem] overflow-hidden rounded-2xl border line-soft bg-night-900/95 shadow-[0_28px_80px_-30px_rgba(0,0,0,0.95)] backdrop-blur-xl"
             >
-                <div class="flex items-center justify-between gap-3 border-b border-white/[0.07] px-4 py-3">
+                <div class="flex items-center justify-between gap-3 border-b line-soft px-4 py-3">
                     <div>
                         <p class="eyebrow">Paleta</p>
                         <p class="mt-0.5 font-display text-sm font-semibold text-bone-50">Temas de la casa</p>
                     </div>
                     <button
                         type="button"
-                        class="grid h-7 w-7 place-items-center rounded-full border border-white/10 text-bone-300 transition hover:border-gold-400/50 hover:text-gold-300"
+                        class="grid h-7 w-7 place-items-center rounded-full border line-soft text-bone-300 transition hover:border-gold-400/50 hover:text-gold-300"
                         aria-label="Cerrar selector de temas"
                         @click="open = false"
                     >
@@ -73,7 +73,7 @@ onBeforeUnmount(() => {
                         :class="
                             current === theme.id
                                 ? 'border-gold-400/60 bg-gold-400/10'
-                                : 'border-white/10 bg-white/[0.03] hover:border-white/25 hover:bg-white/[0.06]'
+                                : 'line-soft surface-2 hover:line-strong hover:surface-3'
                         "
                         :title="theme.description"
                         :aria-pressed="current === theme.id"
@@ -104,7 +104,7 @@ onBeforeUnmount(() => {
                     </button>
                 </div>
 
-                <p class="border-t border-white/[0.07] px-4 py-2 text-[10px] leading-relaxed text-bone-400">
+                <p class="border-t line-soft px-4 py-2 text-[10px] leading-relaxed text-bone-400">
                     Se guarda en este navegador para tu próxima visita.
                 </p>
             </div>

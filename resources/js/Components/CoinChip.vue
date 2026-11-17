@@ -17,7 +17,7 @@ const title = computed(() => `${label.value} · ${formatGuaranies(props.coins)}`
         :title="title"
     >
         <span
-            class="coin-badge coin-glow grid h-6 w-6 place-items-center rounded-full bg-gradient-to-br from-gold-200 to-gold-600 text-[10px] font-black tracking-tight text-night-950"
+            class="coin-badge coin-glow grid h-6 w-6 place-items-center rounded-full text-[10px] font-black tracking-tight text-[var(--accent-ink)]"
         >
             SM
         </span>

@@ -18,8 +18,8 @@ const meta = computed(() => rarityMeta(props.character.rarity));
         type="button"
         class="group relative w-full overflow-hidden rounded-2xl border bg-night-850 text-left transition duration-300 hover:-translate-y-1 hover:shadow-[0_24px_60px_-30px_rgba(0,0,0,0.95)] focus:outline-none focus-visible:ring-2 focus-visible:ring-gold-400/70"
         :style="{
-            borderColor: character.owned ? meta.border : 'rgba(255,255,255,0.08)',
-            boxShadow: character.owned ? `inset 0 1px 0 rgba(255,255,255,0.06), 0 20px 50px -38px ${meta.color}` : 'none',
+            borderColor: character.owned ? meta.border : 'var(--border-soft)',
+            boxShadow: character.owned ? `inset 0 1px 0 var(--border-soft), 0 20px 50px -38px ${meta.color}` : 'none',
         }"
         @click="$emit('select', character)"
     >
@@ -53,7 +53,7 @@ const meta = computed(() => rarityMeta(props.character.rarity));
 
             <span
                 v-if="character.quantity > 1"
-                class="absolute right-2.5 bottom-2.5 rounded-md border border-white/15 bg-night-950/80 px-1.5 py-0.5 text-[10px] font-semibold tabular-nums text-bone-200 backdrop-blur"
+                class="absolute right-2.5 bottom-2.5 rounded-md border line-strong bg-night-950/80 px-1.5 py-0.5 text-[10px] font-semibold tabular-nums text-bone-200 backdrop-blur"
             >
                 ×{{ character.quantity }}
             </span>
@@ -68,7 +68,7 @@ const meta = computed(() => rarityMeta(props.character.rarity));
             </div>
         </div>
 
-        <div class="flex items-center justify-between gap-2 border-t border-white/[0.07] px-2.5 py-1.5">
+        <div class="flex items-center justify-between gap-2 border-t line-soft px-2.5 py-1.5">
             <span class="truncate text-[9px] font-semibold uppercase tracking-[0.16em] text-bone-400">
                 {{ character.category }}
             </span>

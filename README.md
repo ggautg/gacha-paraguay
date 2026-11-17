@@ -8,7 +8,7 @@ Construido con **Laravel 13 + Inertia 3 + Vue 3 + Tailwind CSS 4**.
 
 ## ¿Cómo funciona?
 
-- **63 figuras en el catálogo**: 14 legendarias (3★), 23 épicas (2★) y 26 comunes (1★).
+- **84 figuras en el catálogo**: 18 legendarias (3★), 33 épicas (2★) y 33 comunes (1★).
 - **Sin registro**: el jugador se identifica con una cookie `gacha_player` (UUID, 2 años) y se crea automáticamente en la primera visita.
 - **Sueldos mínimos (SM)**, la moneda del juego:
   - **1 SM = ₲ 3.044.000** (sueldo mínimo legal vigente desde el 1 de julio de 2026, Decreto 6225/2026).
@@ -19,7 +19,7 @@ Construido con **Laravel 13 + Inertia 3 + Vue 3 + Tailwind CSS 4**.
   - Duplicados devuelven un porcentaje de la tirada: **20 % / 60 % / 100 %** según rareza (común, épico, legendario).
 - **Probabilidades por tirada**: común **65 %**, épico **27 %**, legendario **8 %**.
 - **Pity**: si pasan **12 tiradas** sin un legendario, la siguiente lo garantiza.
-- **Álbum**: la colección muestra las 63 figuras; las no descubiertas aparecen como siluetas. Los duplicados aumentan la cantidad y se pueden filtrar por rareza.
+- **Álbum**: la colección muestra las 84 figuras; las no descubiertas aparecen como siluetas. Los duplicados aumentan la cantidad y se pueden filtrar por rareza.
 - **Tirar de vuelta**: el revelado incluye un botón para repetir la misma tirada (×1 o ×10) sin volver a la máquina; se deshabilita si no alcanza el saldo.
 
 ## Temas

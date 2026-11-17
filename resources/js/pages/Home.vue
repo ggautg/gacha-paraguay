@@ -196,7 +196,7 @@ const rates = computed(() => RARITY_ORDER.map((rarity) => ({
                             :disabled="bonusSeconds > 0 || bonusForm.processing"
                             @click="claimBonus"
                         >
-                            <span class="grid h-6 w-6 place-items-center rounded-full border border-current/30 bg-white/[0.04]">
+                            <span class="grid h-6 w-6 place-items-center rounded-full border border-current/30 surface-2">
                                 <svg viewBox="0 0 24 24" class="h-3 w-3" fill="none" stroke="currentColor" stroke-width="2">
                                     <path d="M12 5v14M5 12h14" stroke-linecap="round" />
                                 </svg>
@@ -205,8 +205,8 @@ const rates = computed(() => RARITY_ORDER.map((rarity) => ({
                             <span v-if="bonusSeconds <= 0" class="text-gold-400/80">+{{ formatCoins(player.bonus_coins) }}</span>
                         </button>
 
-                        <span v-if="errors.coins" class="text-[11px] font-medium text-[#ff9c8f]">{{ errors.coins }}</span>
-                        <span v-else-if="errors.bonus" class="text-[11px] font-medium text-[#ff9c8f]">{{ errors.bonus }}</span>
+                        <span v-if="errors.coins" class="text-[11px] font-medium text-danger">{{ errors.coins }}</span>
+                        <span v-else-if="errors.bonus" class="text-[11px] font-medium text-danger">{{ errors.bonus }}</span>
                     </div>
 
                     <div class="mt-8 grid max-w-lg grid-cols-3 gap-3">
@@ -233,7 +233,7 @@ const rates = computed(() => RARITY_ORDER.map((rarity) => ({
                             <span>Progreso del álbum</span>
                             <span class="tabular-nums text-bone-300">{{ player?.stats?.completion }}%</span>
                         </div>
-                        <div class="mt-1.5 h-1.5 overflow-hidden rounded-full bg-white/10">
+                        <div class="mt-1.5 h-1.5 overflow-hidden rounded-full surface-3">
                             <div
                                 class="h-full rounded-full bg-gradient-to-r from-gold-600 via-gold-400 to-gold-200 transition-all duration-700"
                                 :style="{ width: `${player?.stats?.completion}%` }"
@@ -303,7 +303,7 @@ const rates = computed(() => RARITY_ORDER.map((rarity) => ({
                                 </span>
                                 <span class="tabular-nums text-bone-300">{{ rate.rate }}%</span>
                             </div>
-                            <div class="mt-1 h-1.5 overflow-hidden rounded-full bg-white/[0.07]">
+                            <div class="mt-1 h-1.5 overflow-hidden rounded-full surface-3">
                                 <div
                                     class="h-full rounded-full transition-all duration-700"
                                     :style="{ width: `${rate.rate}%`, background: rate.meta.gradient }"
@@ -314,14 +314,14 @@ const rates = computed(() => RARITY_ORDER.map((rarity) => ({
                             </p>
                         </div>
                     </div>
-                    <div class="mt-4 flex items-center justify-between rounded-lg border border-white/[0.07] bg-white/[0.02] px-3 py-2">
+                    <div class="mt-4 flex items-center justify-between rounded-lg border line-soft surface-2 px-3 py-2">
                         <span class="text-[10px] uppercase tracking-wider text-bone-400">Pity</span>
                         <div class="flex items-center gap-1">
                             <span
                                 v-for="dot in player?.pity_limit ?? 12"
                                 :key="dot"
                                 class="h-1.5 w-1.5 rounded-full"
-                                :class="dot <= (player?.pity ?? 0) ? 'bg-gold-400' : 'bg-white/15'"
+                                :class="dot <= (player?.pity ?? 0) ? 'bg-gold-400' : 'surface-3'"
                             />
                         </div>
                         <span class="text-[10px] font-medium text-gold-300">{{ nextLegendary }} restantes</span>
@@ -360,7 +360,7 @@ const rates = computed(() => RARITY_ORDER.map((rarity) => ({
                         </div>
                     </div>
 
-                    <div v-else class="mt-4 flex flex-col items-center justify-center rounded-xl border border-dashed border-white/12 px-4 py-9 text-center">
+                    <div v-else class="mt-4 flex flex-col items-center justify-center rounded-xl border border-dashed line-soft px-4 py-9 text-center">
                         <span class="grid h-10 w-10 place-items-center rounded-full border border-gold-400/30 bg-gold-400/10 font-display text-gold-300">?</span>
                         <p class="mt-3 text-xs font-semibold text-bone-200">Tu vitrina está vacía</p>
                         <p class="mt-1 text-[10px] leading-relaxed text-bone-400">Tu primera tirada ya puede revelar a un prócer.</p>
@@ -432,7 +432,7 @@ const rates = computed(() => RARITY_ORDER.map((rarity) => ({
     position: absolute;
     inset: 12% 3% 6%;
     border-radius: 999px;
-    background: radial-gradient(closest-side, rgba(238, 194, 95, 0.3), transparent 72%);
+    background: radial-gradient(closest-side, rgb(var(--accent-rgb) / 0.3), transparent 72%);
     filter: blur(34px);
 }
 
@@ -451,11 +451,11 @@ const rates = computed(() => RARITY_ORDER.map((rarity) => ({
     top: 4px;
     height: 218px;
     overflow: hidden;
-    border: 1px solid rgba(255, 255, 255, 0.26);
+    border: 1px solid var(--border-strong);
     border-radius: 50% 50% 24px 24px / 58% 58% 16px 16px;
     background:
-        radial-gradient(120% 90% at 28% 10%, rgba(255, 255, 255, 0.34), rgba(255, 255, 255, 0.06) 38%, rgba(255, 255, 255, 0.015) 62%),
-        linear-gradient(160deg, rgba(150, 205, 245, 0.22), rgba(8, 18, 28, 0.62) 72%);
+        radial-gradient(120% 90% at 28% 10%, rgb(255 255 255 / 0.34), rgb(255 255 255 / 0.06) 38%, transparent 62%),
+        linear-gradient(160deg, color-mix(in srgb, var(--color-rare-2) 22%, transparent), color-mix(in srgb, var(--color-night-950) 88%, black) 72%);
     box-shadow:
         inset 0 20px 34px rgba(255, 255, 255, 0.14),
         inset 0 -30px 46px rgba(0, 0, 0, 0.62),
@@ -501,7 +501,7 @@ const rates = computed(() => RARITY_ORDER.map((rarity) => ({
 .cap-1 {
     left: 28px;
     bottom: 26px;
-    background: radial-gradient(circle at 32% 26%, #fff6d8, #eec25f 46%, #9c6d15);
+    background: radial-gradient(circle at 32% 26%, var(--accent-surface-1), var(--accent-surface-2) 46%, var(--accent-surface-3));
 }
 
 .cap-2 {
@@ -509,14 +509,14 @@ const rates = computed(() => RARITY_ORDER.map((rarity) => ({
     bottom: 66px;
     width: 40px;
     height: 40px;
-    background: radial-gradient(circle at 32% 26%, #d6f3ff, #4ec3ff 48%, #116a9c);
+    background: radial-gradient(circle at 32% 26%, color-mix(in srgb, var(--color-rare-2) 45%, white), var(--color-rare-2) 48%, color-mix(in srgb, var(--color-rare-2) 65%, black));
     animation-delay: -1.4s;
 }
 
 .cap-3 {
     right: 34px;
     bottom: 34px;
-    background: radial-gradient(circle at 32% 26%, #ffd9d4, #e04534 48%, #8c150d);
+    background: radial-gradient(circle at 32% 26%, color-mix(in srgb, var(--color-flag-red) 50%, white), var(--color-flag-red) 48%, color-mix(in srgb, var(--color-flag-red) 60%, black));
     animation-delay: -2.6s;
 }
 
@@ -525,7 +525,7 @@ const rates = computed(() => RARITY_ORDER.map((rarity) => ({
     bottom: 92px;
     width: 38px;
     height: 38px;
-    background: radial-gradient(circle at 32% 26%, #ffffff, #ded3ba 48%, #8d8069);
+    background: radial-gradient(circle at 32% 26%, var(--color-bone-50), var(--color-bone-200) 48%, var(--color-bone-400));
     animation-delay: -3.4s;
 }
 
@@ -534,7 +534,12 @@ const rates = computed(() => RARITY_ORDER.map((rarity) => ({
     bottom: 112px;
     width: 34px;
     height: 34px;
-    background: radial-gradient(circle at 32% 26%, #d8ffe9, #65d6a4 48%, #176a4b);
+    background: radial-gradient(
+        circle at 32% 26%,
+        color-mix(in srgb, rgb(var(--accent-rgb)) 45%, white),
+        rgb(var(--accent-rgb)) 48%,
+        color-mix(in srgb, rgb(var(--accent-rgb)) 65%, black)
+    );
     animation-delay: -4.2s;
 }
 
@@ -543,9 +548,15 @@ const rates = computed(() => RARITY_ORDER.map((rarity) => ({
     inset: auto 0 0 0;
     height: 228px;
     overflow: hidden;
-    border: 1px solid rgba(255, 255, 255, 0.18);
+    border: 1px solid var(--border-strong);
     border-radius: 24px 24px 20px 20px;
-    background: linear-gradient(180deg, #d43a2b 0%, #b3261c 26%, #821810 70%, #4c0c08 100%);
+    background: linear-gradient(
+        180deg,
+        var(--color-flag-red) 0%,
+        color-mix(in srgb, var(--color-flag-red) 85%, black) 26%,
+        color-mix(in srgb, var(--color-flag-red) 60%, black) 70%,
+        color-mix(in srgb, var(--color-flag-red) 35%, black) 100%
+    );
     box-shadow:
         inset 0 2px 0 rgba(255, 255, 255, 0.24),
         inset 0 -26px 44px rgba(0, 0, 0, 0.55),
@@ -558,7 +569,7 @@ const rates = computed(() => RARITY_ORDER.map((rarity) => ({
     inset: 0 0 auto 0;
     height: 15px;
     border-bottom: 1px solid rgba(0, 0, 0, 0.35);
-    background: linear-gradient(180deg, #fbe8b4, #d8a43c 55%, #966a1a);
+    background: linear-gradient(180deg, var(--accent-surface-1), var(--accent-surface-2) 55%, var(--accent-surface-3));
 }
 
 .machine-base::after {
@@ -578,9 +589,9 @@ const rates = computed(() => RARITY_ORDER.map((rarity) => ({
     width: 192px;
     transform: translateX(-50%);
     padding: 8px 0 7px;
-    border: 1px solid rgba(255, 235, 190, 0.45);
+    border: 1px solid rgb(var(--accent-rgb) / 0.45);
     border-radius: 10px;
-    background: linear-gradient(180deg, rgba(18, 7, 5, 0.94), rgba(42, 12, 8, 0.94));
+    background: linear-gradient(180deg, color-mix(in srgb, var(--color-night-950) 94%, black), color-mix(in srgb, var(--color-night-800) 94%, black));
     text-align: center;
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16), 0 6px 16px rgba(0, 0, 0, 0.4);
 }
@@ -589,7 +600,7 @@ const rates = computed(() => RARITY_ORDER.map((rarity) => ({
     display: block;
     font-size: 7px;
     letter-spacing: 0.45em;
-    color: #d8a43c;
+    color: var(--accent-surface-2);
 }
 
 .machine-plate strong {
@@ -598,8 +609,8 @@ const rates = computed(() => RARITY_ORDER.map((rarity) => ({
     font-family: var(--font-display);
     font-size: 17px;
     letter-spacing: 0.15em;
-    color: #f6d98d;
-    text-shadow: 0 0 18px rgba(238, 194, 95, 0.45);
+    color: var(--accent-surface-1);
+    text-shadow: 0 0 18px rgb(var(--accent-rgb) / 0.45);
 }
 
 .knob {
@@ -611,9 +622,9 @@ const rates = computed(() => RARITY_ORDER.map((rarity) => ({
     height: 74px;
     place-items: center;
     transform: translateX(-50%);
-    border: 3px solid #5d3f0e;
+    border: 3px solid var(--accent-surface-3);
     border-radius: 50%;
-    background: radial-gradient(circle at 32% 26%, #fff4cd, #eec25f 44%, #b47f26 72%, #7a5312);
+    background: radial-gradient(circle at 32% 26%, var(--accent-surface-1), var(--accent-surface-2) 44%, var(--accent-surface-3) 72%, color-mix(in srgb, var(--accent-surface-3) 65%, black));
     box-shadow:
         0 10px 20px rgba(0, 0, 0, 0.5),
         inset 0 -4px 8px rgba(0, 0, 0, 0.35),
@@ -631,8 +642,8 @@ const rates = computed(() => RARITY_ORDER.map((rarity) => ({
 
 .knob-star {
     font-size: 24px;
-    color: #6b4a0d;
-    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.45);
+    color: var(--accent-ink);
+    text-shadow: 0 1px 0 rgb(255 255 255 / 0.45);
 }
 
 .knob-turn {
@@ -645,9 +656,9 @@ const rates = computed(() => RARITY_ORDER.map((rarity) => ({
     left: 22px;
     width: 26px;
     height: 44px;
-    border: 1px solid rgba(238, 194, 95, 0.35);
+    border: 1px solid rgb(var(--accent-rgb) / 0.35);
     border-radius: 6px;
-    background: linear-gradient(180deg, #2a0b08, #140505);
+    background: linear-gradient(180deg, color-mix(in srgb, var(--color-flag-red) 18%, black), color-mix(in srgb, var(--color-flag-red) 8%, black));
     box-shadow: inset 0 0 10px #000;
 }
 
@@ -660,7 +671,7 @@ const rates = computed(() => RARITY_ORDER.map((rarity) => ({
     width: 2px;
     transform: translateX(-50%);
     border-radius: 2px;
-    background: rgba(238, 194, 95, 0.55);
+    background: rgb(var(--accent-rgb) / 0.55);
 }
 
 .tray {
@@ -670,9 +681,9 @@ const rates = computed(() => RARITY_ORDER.map((rarity) => ({
     width: 130px;
     height: 28px;
     transform: translateX(-50%);
-    border: 1px solid rgba(255, 255, 255, 0.12);
+    border: 1px solid var(--border-soft);
     border-radius: 8px;
-    background: linear-gradient(180deg, #120504, #290b08);
+    background: linear-gradient(180deg, color-mix(in srgb, var(--color-night-950) 96%, black), color-mix(in srgb, var(--color-flag-red) 20%, black));
     box-shadow: inset 0 6px 14px rgba(0, 0, 0, 0.9), 0 1px 0 rgba(255, 255, 255, 0.14);
 }
 
@@ -690,9 +701,9 @@ const rates = computed(() => RARITY_ORDER.map((rarity) => ({
     bottom: 0;
     left: 20px;
     width: 14px;
-    border: 1px solid rgba(255, 255, 255, 0.14);
+    border: 1px solid var(--border-soft);
     border-radius: 999px;
-    background: linear-gradient(90deg, #1b0a08, #3d1510);
+    background: linear-gradient(90deg, color-mix(in srgb, var(--color-night-950) 96%, black), color-mix(in srgb, var(--color-flag-red) 28%, black));
     box-shadow: inset 0 0 8px #000;
 }
 
@@ -709,7 +720,7 @@ const rates = computed(() => RARITY_ORDER.map((rarity) => ({
     width: 6px;
     height: 46px;
     border-radius: 4px;
-    background: linear-gradient(90deg, #9c7420, #f6d98d, #9c7420);
+    background: linear-gradient(90deg, var(--accent-surface-3), var(--accent-surface-1), var(--accent-surface-3));
 }
 
 .lever-ball {
@@ -719,7 +730,7 @@ const rates = computed(() => RARITY_ORDER.map((rarity) => ({
     width: 34px;
     height: 34px;
     border-radius: 50%;
-    background: radial-gradient(circle at 32% 28%, #ff9b8d, #d52b1e 52%, #7b120c);
+    background: radial-gradient(circle at 32% 28%, color-mix(in srgb, var(--color-flag-red) 55%, white), var(--color-flag-red) 52%, color-mix(in srgb, var(--color-flag-red) 60%, black));
     box-shadow: 0 8px 18px rgba(0, 0, 0, 0.5), inset 0 3px 6px rgba(255, 255, 255, 0.35);
 }
 

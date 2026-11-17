@@ -5,7 +5,7 @@ export const RARITY = {
         soft: 'var(--rare-3-soft)',
         glow: 'var(--rare-3-glow)',
         border: 'var(--rare-3-border)',
-        gradient: 'linear-gradient(135deg, #fdf3d8 0%, #eec25f 45%, #b47f26 100%)',
+        gradient: 'linear-gradient(135deg, color-mix(in srgb, var(--color-rare-3) 55%, white), var(--color-rare-3), color-mix(in srgb, var(--color-rare-3) 70%, black))',
         blurb: 'Las figuras que cambiaron el rumbo del país.',
     },
     2: {
@@ -14,7 +14,7 @@ export const RARITY = {
         soft: 'var(--rare-2-soft)',
         glow: 'var(--rare-2-glow)',
         border: 'var(--rare-2-border)',
-        gradient: 'linear-gradient(135deg, #c8f0ff 0%, #4ec3ff 50%, #1b6fa8 100%)',
+        gradient: 'linear-gradient(135deg, color-mix(in srgb, var(--color-rare-2) 55%, white), var(--color-rare-2), color-mix(in srgb, var(--color-rare-2) 70%, black))',
         blurb: 'Protagonistas de la historia, el arte y el deporte.',
     },
     1: {
@@ -23,7 +23,7 @@ export const RARITY = {
         soft: 'var(--rare-1-soft)',
         glow: 'var(--rare-1-glow)',
         border: 'var(--rare-1-border)',
-        gradient: 'linear-gradient(135deg, #e2ebf3 0%, #9fb3c8 55%, #5f7488 100%)',
+        gradient: 'linear-gradient(135deg, color-mix(in srgb, var(--color-rare-1) 55%, white), var(--color-rare-1), color-mix(in srgb, var(--color-rare-1) 70%, black))',
         blurb: 'Presidentes, cronistas y exploradores.',
     },
 };

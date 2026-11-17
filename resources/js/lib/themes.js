@@ -105,7 +105,7 @@ export function applyTheme(id) {
 export function initTheme() {
     const id = getStoredTheme();
 
-    document.documentElement.setAttribute('data-theme', id);
+    applyTheme(id);
 
     window.requestAnimationFrame(() => {
         window.requestAnimationFrame(() => {
