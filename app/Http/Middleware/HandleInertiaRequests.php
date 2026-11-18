@@ -7,10 +7,17 @@ use App\Support\GachaPresenter;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
+/**
+ * Middleware de Inertia que comparte con el frontend los datos globales del juego.
+ *
+ * Expone el jugador resuelto por EnsurePlayer junto con tasas, precios, pity y sueldo,
+ * de modo que la UI no tenga que consultarlos por separado y las reglas económicas
+ * tengan una sola fuente de verdad: config/gachapon.php.
+ */
 class HandleInertiaRequests extends Middleware
 {
     /**
-     * The root template that's loaded on the first page visit.
+     * Plantilla Blade raíz que se carga en la primera visita a la página.
      *
      * @see https://inertiajs.com/server-side-setup#root-template
      *
@@ -19,7 +26,10 @@ class HandleInertiaRequests extends Middleware
     protected $rootView = 'app';
 
     /**
-     * Determines the current asset version.
+     * Determina la versión actual de los assets.
+     *
+     * Se delega en el padre para usar el manifiesto de Vite: así un cambio de assets
+     * fuerza una recarga completa sin tener que mantener una versión a mano.
      *
      * @see https://inertiajs.com/asset-versioning
      */
@@ -29,7 +39,12 @@ class HandleInertiaRequests extends Middleware
     }
 
     /**
-     * Define the props that are shared by default.
+     * Define las props que se comparten por defecto en todas las respuestas Inertia.
+     *
+     * El jugador se envía como closure para que se evalúe de forma diferida: las
+     * respuestas parciales que no lo necesitan no pagan el costo de recalcular su
+     * colección. Los valores de gachapon salen de config para que el frontend aplique
+     * exactamente las mismas reglas que el servidor.
      *
      * @see https://inertiajs.com/shared-data
      *

@@ -1,8 +1,17 @@
 <script setup>
+/**
+ * Tarjeta de una figura en la grilla de la colección.
+ *
+ * Antes replicaba el lector de imágenes y la pastilla de rareza que ya viven
+ * en `CharacterPortrait` y `RarityBadge`. Ahora solo se encarga de la
+ * presentación: marco, anti-spoiler, contador de copias y el evento `select`.
+ * Dejar la recuperación de imágenes en un solo componente evita que una URL rota
+ * se vea distinto en la tarjeta, el modal y el revelado.
+ */
 import { computed } from 'vue';
 import { rarityMeta } from '../lib/rarity';
-import PortraitFallback from './PortraitFallback.vue';
-import RarityStars from './RarityStars.vue';
+import CharacterPortrait from './CharacterPortrait.vue';
+import RarityBadge from './RarityBadge.vue';
 
 const props = defineProps({
     character: { type: Object, required: true },
@@ -21,17 +30,18 @@ const meta = computed(() => rarityMeta(props.character.rarity));
             borderColor: character.owned ? meta.border : 'var(--border-soft)',
             boxShadow: character.owned ? `inset 0 1px 0 var(--border-soft), 0 20px 50px -38px ${meta.color}` : 'none',
         }"
+        :aria-label="character.owned ? `Ver figura: ${character.name}` : `Ver figura sin descubrir`"
         @click="$emit('select', character)"
     >
         <div class="relative aspect-[3/4] overflow-hidden">
-            <img
-                v-if="character.image"
-                :src="character.image"
-                :alt="`Retrato de ${character.name}`"
-                loading="lazy"
-                class="h-full w-full object-cover object-top transition duration-500 group-hover:scale-105"
-            />
-            <PortraitFallback v-else :name="character.name" :owned="character.owned" />
+            <div class="h-full w-full transition duration-500 group-hover:scale-105">
+                <CharacterPortrait
+                    :image="character.image"
+                    :name="character.name"
+                    :owned="character.owned"
+                    lazy
+                />
+            </div>
 
             <div
                 v-if="!character.owned"
@@ -40,15 +50,7 @@ const meta = computed(() => rarityMeta(props.character.rarity));
             <div class="absolute inset-x-0 bottom-0 h-3/5 bg-gradient-to-t from-night-950 via-night-950/70 to-transparent" />
 
             <div class="absolute inset-x-2.5 top-2.5 flex items-start justify-between gap-1">
-                <span
-                    class="rounded-full px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.14em] backdrop-blur"
-                    :style="{ color: meta.color, backgroundColor: meta.soft, border: `1px solid ${meta.border}` }"
-                >
-                    {{ meta.label }}
-                </span>
-                <span class="rounded-full bg-night-950/60 px-1.5 py-1 backdrop-blur">
-                    <RarityStars :rarity="character.rarity" />
-                </span>
+                <RarityBadge :rarity="character.rarity" />
             </div>
 
             <span

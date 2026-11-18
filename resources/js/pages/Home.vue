@@ -1,11 +1,25 @@
 <script setup>
+/**
+ * Pantalla de la máquina: tiradas, bonificación, probabilidades y vitrina.
+ *
+ * La petición de tirada se hace con `router.post` en lugar de `useForm`
+ * porque no hay campos que validar: solo un contador. Mientras responde,
+ * `pulling` bloquea los botones y mueve la palanca para que el usuario sepa
+ * que la acción está en curso. El revelado se mantiene abierto durante la
+ * segunda tirada (`Tirar de vuelta`) para evitar el parpadeo de cerrar y
+ * volver a abrir; el contenido se actualiza solo cuando llega la respuesta.
+ */
 import { Head, Link, router, useForm, usePage } from '@inertiajs/vue3';
 import { computed, onBeforeUnmount, ref, watch } from 'vue';
 import AppLayout from '../Layouts/AppLayout.vue';
+import CharacterPortrait from '../Components/CharacterPortrait.vue';
 import CoinChip from '../Components/CoinChip.vue';
-import PortraitFallback from '../Components/PortraitFallback.vue';
+import EmptyState from '../Components/EmptyState.vue';
+import PanelHeader from '../Components/PanelHeader.vue';
+import ProgressBar from '../Components/ProgressBar.vue';
 import PullReveal from '../Components/PullReveal.vue';
 import RarityStars from '../Components/RarityStars.vue';
+import StatCard from '../Components/StatCard.vue';
 import { RARITY_ORDER, formatCoins, formatGuaranies, formatNumber, rarityMeta } from '../lib/rarity';
 
 defineProps({
@@ -101,9 +115,7 @@ function pullAgain() {
         return;
     }
 
-    const count = revealCount.value;
-    showReveal.value = false;
-    pull(count);
+    pull(revealCount.value);
 }
 
 const rates = computed(() => RARITY_ORDER.map((rarity) => ({
@@ -149,7 +161,7 @@ const rates = computed(() => RARITY_ORDER.map((rarity) => ({
                     </h1>
 
                     <p class="mt-5 max-w-lg text-sm leading-relaxed text-bone-300 sm:text-[15px]">
-                        Invocá a los próceres, artistas, presidentes y leyendas que construyeron el Paraguay.
+                        Descubrí a los próceres, artistas, presidentes y leyendas que construyeron el Paraguay.
                         Cada tirada revela un retrato y su historia real, tomados de Wikipedia.
                     </p>
 
@@ -158,13 +170,14 @@ const rates = computed(() => RARITY_ORDER.map((rarity) => ({
                             type="button"
                             class="btn-gold group px-7 py-3.5 text-base"
                             :disabled="pulling !== null || !canMulti"
+                            :title="canMulti ? `Tirar ${gacha.multi_pull} figuras por ${formatCoins(gacha.price_multi)}` : 'Saldo insuficiente para la tirada múltiple'"
                             @click="pull(gacha.multi_pull)"
                         >
                             <span class="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/40 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
                             <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.7">
                                 <path d="M4 8.5V6a2 2 0 012-2h12a2 2 0 012 2v2.5M4 8.5v9a2 2 0 002 2h12a2 2 0 002-2v-9M4 8.5h16M9 12h6M9 15.5h6" stroke-linecap="round" stroke-linejoin="round" />
                             </svg>
-                            <span>Tirar ×{{ gacha.multi_pull }}</span>
+                            <span>{{ pulling === gacha.multi_pull ? 'Tirando…' : `Tirar ×${gacha.multi_pull}` }}</span>
                             <span class="rounded-md bg-night-950/15 px-2 py-0.5 text-[11px] font-bold tabular-nums">{{ formatCoins(gacha.price_multi) }}</span>
                         </button>
 
@@ -172,15 +185,24 @@ const rates = computed(() => RARITY_ORDER.map((rarity) => ({
                             type="button"
                             class="btn-ghost px-5 py-3.5 text-sm"
                             :disabled="pulling !== null || !canSingle"
+                            :title="canSingle ? `Tirar una figura por ${formatCoins(gacha.price_single)}` : 'Saldo insuficiente para la tirada simple'"
                             @click="pull(1)"
                         >
                             <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.7">
                                 <circle cx="12" cy="12" r="8" /><path d="M12 8v8M8 12h8" stroke-linecap="round" />
                             </svg>
-                            <span>{{ pulling === 1 ? 'Invocando…' : 'Tirar ×1' }}</span>
+                            <span>{{ pulling === 1 ? 'Tirando…' : 'Tirar ×1' }}</span>
                             <span class="text-[11px] tabular-nums text-bone-400">{{ formatCoins(gacha.price_single) }}</span>
                         </button>
                     </div>
+
+                    <!-- El error de saldo aparece junto a los botones que lo originaron. -->
+                    <p v-if="errors.coins" class="mt-3 text-[11px] font-medium text-danger" role="alert">
+                        {{ errors.coins }}
+                    </p>
+                    <p v-else-if="!canSingle" class="mt-3 text-[10px] text-bone-400" role="status">
+                        Te faltan monedas para tirar. Reclamá la bonificación o volvé más tarde.
+                    </p>
 
                     <p class="mt-3 max-w-xl text-[10px] leading-relaxed text-bone-400">
                         <span class="font-semibold text-gold-300/90">1 SM = {{ formatGuaranies(gacha.salary.amount) }}</span>
@@ -205,40 +227,30 @@ const rates = computed(() => RARITY_ORDER.map((rarity) => ({
                             <span v-if="bonusSeconds <= 0" class="text-gold-400/80">+{{ formatCoins(player.bonus_coins) }}</span>
                         </button>
 
-                        <span v-if="errors.coins" class="text-[11px] font-medium text-danger">{{ errors.coins }}</span>
-                        <span v-else-if="errors.bonus" class="text-[11px] font-medium text-danger">{{ errors.bonus }}</span>
+                        <span v-if="errors.bonus" class="text-[11px] font-medium text-danger" role="alert">{{ errors.bonus }}</span>
                     </div>
 
                     <div class="mt-8 grid max-w-lg grid-cols-3 gap-3">
-                        <div class="panel px-3.5 py-3">
-                            <p class="text-[9px] uppercase tracking-[0.18em] text-bone-400">Colección</p>
-                            <p class="mt-1 font-display text-lg text-bone-50">
-                                {{ player?.stats?.owned }}<span class="text-xs text-bone-400">/{{ player?.stats?.total }}</span>
-                            </p>
-                        </div>
-                        <div class="panel px-3.5 py-3">
-                            <p class="text-[9px] uppercase tracking-[0.18em] text-bone-400">Tiradas</p>
-                            <p class="mt-1 font-display text-lg text-bone-50">{{ formatNumber(player?.total_pulls) }}</p>
-                        </div>
-                        <div class="panel px-3.5 py-3">
-                            <p class="text-[9px] uppercase tracking-[0.18em] text-bone-400">Legendarios</p>
-                            <p class="mt-1 font-display text-lg text-gold-300">
-                                {{ player?.stats?.by_rarity?.[3]?.owned }}<span class="text-xs text-bone-400">/{{ player?.stats?.by_rarity?.[3]?.total }}</span>
-                            </p>
-                        </div>
+                        <StatCard
+                            label="Colección"
+                            :value="player?.stats?.owned ?? 0"
+                            :suffix="`/${player?.stats?.total ?? 0}`"
+                        />
+                        <StatCard label="Tiradas" :value="formatNumber(player?.total_pulls)" />
+                        <StatCard
+                            label="Legendarios"
+                            :value="player?.stats?.by_rarity?.[3]?.owned ?? 0"
+                            :suffix="`/${player?.stats?.by_rarity?.[3]?.total ?? 0}`"
+                            accent
+                        />
                     </div>
 
                     <div class="mt-3 max-w-lg">
                         <div class="flex items-center justify-between text-[10px] text-bone-400">
-                            <span>Progreso del álbum</span>
+                            <span>Progreso de la colección</span>
                             <span class="tabular-nums text-bone-300">{{ player?.stats?.completion }}%</span>
                         </div>
-                        <div class="mt-1.5 h-1.5 overflow-hidden rounded-full surface-3">
-                            <div
-                                class="h-full rounded-full bg-gradient-to-r from-gold-600 via-gold-400 to-gold-200 transition-all duration-700"
-                                :style="{ width: `${player?.stats?.completion}%` }"
-                            />
-                        </div>
+                        <ProgressBar class="mt-1.5" :value="player?.stats?.completion ?? 0" />
                     </div>
                 </div>
 
@@ -277,8 +289,8 @@ const rates = computed(() => RARITY_ORDER.map((rarity) => ({
                             </div>
                         </div>
 
-                        <p class="mt-6 text-center text-[10px] uppercase tracking-[0.32em] text-bone-400">
-                            {{ pulling !== null ? 'Invocando al pasado…' : 'Tirá de la palanca' }}
+                        <p class="mt-6 text-center text-[10px] uppercase tracking-[0.32em] text-bone-400" role="status" aria-live="polite">
+                            {{ pulling !== null ? 'Tirando de la máquina…' : 'Tirá de la palanca' }}
                         </p>
                     </div>
                 </div>
@@ -290,10 +302,7 @@ const rates = computed(() => RARITY_ORDER.map((rarity) => ({
         <section class="mx-auto max-w-6xl px-4 py-10 sm:px-6">
             <div class="grid gap-4 lg:grid-cols-[1.1fr_1fr_1fr]">
                 <div class="panel paper-noise p-5">
-                    <div class="flex items-center justify-between">
-                        <h2 class="eyebrow">Probabilidades</h2>
-                        <span class="text-[10px] text-bone-400">por tirada</span>
-                    </div>
+                    <PanelHeader title="Probabilidades" hint="por tirada" />
                     <div class="mt-4 space-y-3.5">
                         <div v-for="rate in rates" :key="rate.rarity">
                             <div class="flex items-center justify-between text-[11px]">
@@ -303,19 +312,14 @@ const rates = computed(() => RARITY_ORDER.map((rarity) => ({
                                 </span>
                                 <span class="tabular-nums text-bone-300">{{ rate.rate }}%</span>
                             </div>
-                            <div class="mt-1 h-1.5 overflow-hidden rounded-full surface-3">
-                                <div
-                                    class="h-full rounded-full transition-all duration-700"
-                                    :style="{ width: `${rate.rate}%`, background: rate.meta.gradient }"
-                                />
-                            </div>
+                            <ProgressBar class="mt-1.5" :value="rate.rate" :gradient="rate.meta.gradient" />
                             <p class="mt-1 text-[9px] text-bone-400">
                                 {{ rate.owned }}/{{ rate.total }} descubiertos
                             </p>
                         </div>
                     </div>
                     <div class="mt-4 flex items-center justify-between rounded-lg border line-soft surface-2 px-3 py-2">
-                        <span class="text-[10px] uppercase tracking-wider text-bone-400">Pity</span>
+                        <span class="text-[10px] uppercase tracking-wider text-bone-400">Garantía</span>
                         <div class="flex items-center gap-1">
                             <span
                                 v-for="dot in player?.pity_limit ?? 12"
@@ -329,12 +333,13 @@ const rates = computed(() => RARITY_ORDER.map((rarity) => ({
                 </div>
 
                 <div class="panel p-5">
-                    <div class="flex items-center justify-between">
-                        <h2 class="eyebrow">Tu vitrina</h2>
-                        <Link href="/coleccion" class="text-[10px] font-semibold uppercase tracking-wider text-gold-300 hover:text-gold-200">
-                            Ver todo
-                        </Link>
-                    </div>
+                    <PanelHeader title="Tu vitrina">
+                        <template #action>
+                            <Link href="/coleccion" class="text-[10px] font-semibold uppercase tracking-wider text-gold-300 hover:text-gold-200">
+                                Ver todo
+                            </Link>
+                        </template>
+                    </PanelHeader>
 
                     <div v-if="showcase.length" class="mt-4 grid grid-cols-3 gap-2">
                         <div
@@ -343,13 +348,7 @@ const rates = computed(() => RARITY_ORDER.map((rarity) => ({
                             class="relative aspect-[3/4] overflow-hidden rounded-lg border bg-night-850"
                             :style="{ borderColor: rarityMeta(character.rarity).border }"
                         >
-                            <img
-                                v-if="character.image"
-                                :src="character.image"
-                                :alt="character.name"
-                                class="h-full w-full object-cover object-top"
-                            />
-                            <PortraitFallback v-else :name="character.name" owned />
+                            <CharacterPortrait :image="character.image" :name="character.name" owned />
                             <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-night-950 to-transparent px-1.5 pb-1 pt-4">
                                 <p class="truncate text-[9px] font-semibold text-bone-100">{{ character.name }}</p>
                             </div>
@@ -360,11 +359,12 @@ const rates = computed(() => RARITY_ORDER.map((rarity) => ({
                         </div>
                     </div>
 
-                    <div v-else class="mt-4 flex flex-col items-center justify-center rounded-xl border border-dashed line-soft px-4 py-9 text-center">
-                        <span class="grid h-10 w-10 place-items-center rounded-full border border-gold-400/30 bg-gold-400/10 font-display text-gold-300">?</span>
-                        <p class="mt-3 text-xs font-semibold text-bone-200">Tu vitrina está vacía</p>
-                        <p class="mt-1 text-[10px] leading-relaxed text-bone-400">Tu primera tirada ya puede revelar a un prócer.</p>
-                    </div>
+                    <EmptyState
+                        v-else
+                        class="mt-4"
+                        title="Tu vitrina está vacía"
+                        description="Tu primera tirada ya puede revelar a un prócer."
+                    />
 
                     <div class="mt-4">
                         <CoinChip :coins="player?.coins" />
@@ -372,10 +372,7 @@ const rates = computed(() => RARITY_ORDER.map((rarity) => ({
                 </div>
 
                 <div class="panel p-5">
-                    <div class="flex items-center justify-between">
-                        <h2 class="eyebrow">Últimas tiradas</h2>
-                        <span class="text-[10px] tabular-nums text-bone-400">{{ player?.total_pulls }} en total</span>
-                    </div>
+                    <PanelHeader title="Últimas tiradas" :hint="`${player?.total_pulls ?? 0} en total`" />
 
                     <ul v-if="recent.length" class="mt-4 space-y-2">
                         <li v-for="item in recent.slice(0, 4)" :key="item.id" class="flex items-center gap-2.5">
@@ -383,8 +380,7 @@ const rates = computed(() => RARITY_ORDER.map((rarity) => ({
                                 class="relative h-9 w-9 shrink-0 overflow-hidden rounded-full border"
                                 :style="{ borderColor: rarityMeta(item.rarity).border }"
                             >
-                                <img v-if="item.image" :src="item.image" :alt="item.name" class="h-full w-full object-cover object-top" />
-                                <PortraitFallback v-else :name="item.name" owned />
+                                <CharacterPortrait :image="item.image" :name="item.name" owned />
                             </span>
                             <span class="min-w-0 flex-1">
                                 <span class="block truncate text-[11px] font-semibold text-bone-100">{{ item.name }}</span>
@@ -394,9 +390,13 @@ const rates = computed(() => RARITY_ORDER.map((rarity) => ({
                         </li>
                     </ul>
 
-                    <p v-else class="mt-6 text-center text-[11px] leading-relaxed text-bone-400">
-                        Todavía no hay tiradas.<br />La historia te está esperando.
-                    </p>
+                    <EmptyState
+                        v-else
+                        class="mt-4"
+                        icon="✦"
+                        title="Todavía no hay tiradas"
+                        description="La historia te está esperando."
+                    />
                 </div>
             </div>
         </section>
@@ -406,12 +406,12 @@ const rates = computed(() => RARITY_ORDER.map((rarity) => ({
                 <div class="paper-noise absolute inset-0 opacity-40" />
                 <div class="relative flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
                     <div>
-                        <p class="eyebrow">{{ player?.stats?.total }} sellos · 3 rarezas</p>
+                        <p class="eyebrow">{{ player?.stats?.total }} figuras · 3 rarezas</p>
                         <h2 class="mt-1.5 font-display text-xl text-bone-50 sm:text-2xl">¿Ya viste tu colección completa?</h2>
                         <p class="mt-1 text-xs text-bone-300">Los retratos se revelan a medida que los descubrís.</p>
                     </div>
                     <Link href="/coleccion" class="btn-ghost px-6 py-3 text-sm">
-                        Abrir el álbum
+                        Abrir la colección
                         <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M5 12h14M13 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round" />
                         </svg>

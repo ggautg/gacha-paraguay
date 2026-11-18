@@ -253,7 +253,7 @@ return [
         31 => [
             'name' => 'Víctor Pecci',
             'wiki' => 'Víctor Pecci',
-            'role' => 'Top 10 del tenis mundial',
+            'role' => 'N.º 10 del tenis mundial',
             'era' => 'n. 1955',
             'category' => 'Deporte',
             'rarity' => 2,
@@ -419,7 +419,7 @@ return [
             'rarity' => 3,
         ],
         52 => [
-            'name' => 'Kerana',
+            'name' => 'Keraná',
             'wiki' => 'Taú y Keraná',
             'role' => 'Madre de los siete monstruos',
             'era' => 'Tradición oral',
@@ -477,7 +477,7 @@ return [
         59 => [
             'name' => 'Luisón',
             'wiki' => 'Luisón',
-            'role' => 'El séptimo hijo de Tau y Kerana',
+            'role' => 'El séptimo hijo de Taú y Keraná',
             'era' => 'Tradición oral',
             'category' => 'Mitología',
             'rarity' => 3,

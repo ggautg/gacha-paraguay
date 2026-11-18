@@ -1,7 +1,21 @@
 <script setup>
-import { computed, onBeforeUnmount, ref, watch } from 'vue';
+/**
+ * Ficha detallada de una figura, abierta desde la colección.
+ *
+ * El componente mantiene un `visible` independiente de la prop para que la
+ * transición de salida alcance a dibujarse: si se ocultara apenas la prop
+ * pasa a `null`, el modal desaparecería de golpe. Escape y el bloqueo del
+ * scroll los maneja `useDismissableOverlay`, igual que el revelado de tiradas.
+ *
+ * El extracto se muestra solo para personajes descubiertos: es la regla
+ * anti-spoiler que mantiene la gracia de la colección.
+ */
+import { computed, ref, watch } from 'vue';
 import { rarityMeta } from '../lib/rarity';
-import PortraitFallback from './PortraitFallback.vue';
+import { useDismissableOverlay } from '../composables/useDismissableOverlay';
+import CharacterPortrait from './CharacterPortrait.vue';
+import CloseButton from './CloseButton.vue';
+import RarityBadge from './RarityBadge.vue';
 import RarityStars from './RarityStars.vue';
 
 const props = defineProps({
@@ -30,75 +44,42 @@ const linkLabel = computed(() => {
     }
 });
 
-function onKeydown(event) {
-    if (event.key === 'Escape') {
-        emit('close');
-    }
+function close() {
+    emit('close');
 }
 
 watch(
     () => props.character,
     (character) => {
         visible.value = Boolean(character);
-
-        if (typeof document === 'undefined') {
-            return;
-        }
-
-        document.body.style.overflow = character ? 'hidden' : '';
-
-        if (character) {
-            window.addEventListener('keydown', onKeydown);
-        } else {
-            window.removeEventListener('keydown', onKeydown);
-        }
     },
-    { immediate: true },
 );
 
-onBeforeUnmount(() => {
-    document.body.style.overflow = '';
-    window.removeEventListener('keydown', onKeydown);
-});
+useDismissableOverlay({ active: () => Boolean(props.character), onEscape: close });
 </script>
 
 <template>
     <Teleport to="body">
         <Transition name="modal">
-            <div v-if="visible && character" class="fixed inset-0 z-50 flex items-end justify-center p-0 sm:items-center sm:p-6" role="dialog" aria-modal="true">
-                <div class="absolute inset-0 bg-night-950/85 backdrop-blur-md" @click="$emit('close')" />
+            <div v-if="visible && character" class="fixed inset-0 z-50 flex items-end justify-center p-0 sm:items-center sm:p-6" role="dialog" aria-modal="true" :aria-label="`Detalle de ${character.name}`">
+                <div class="absolute inset-0 bg-night-950/85 backdrop-blur-md" @click="close" />
 
                 <div
                     class="relative z-10 flex max-h-[92vh] w-full max-w-3xl flex-col overflow-hidden rounded-t-3xl border bg-night-900 shadow-[0_40px_120px_-40px_rgba(0,0,0,1)] sm:rounded-3xl md:grid md:grid-cols-[300px_1fr]"
                     :style="{ borderColor: meta.border }"
                 >
-                    <button
-                        type="button"
-                        class="absolute right-3 top-3 z-20 grid h-9 w-9 place-items-center rounded-full border line-strong bg-night-950/70 text-bone-200 backdrop-blur transition hover:border-gold-400/60 hover:text-gold-300"
-                        aria-label="Cerrar"
-                        @click="$emit('close')"
-                    >
-                        <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M6 6l12 12M18 6L6 18" stroke-linecap="round" />
-                        </svg>
-                    </button>
+                    <CloseButton class="absolute right-3 top-3 z-20" label="Cerrar detalle de la figura" @click="close" />
 
                     <div class="relative h-64 shrink-0 overflow-hidden md:h-auto">
-                        <img
-                            v-if="character.image"
-                            :src="character.image"
-                            :alt="`Retrato de ${character.name}`"
-                            class="h-full w-full object-cover object-top"
-                        />
-                        <PortraitFallback v-else :name="character.name" :owned="character.owned" />
+                        <CharacterPortrait :image="character.image" :name="character.name" :owned="character.owned" />
 
                         <div class="absolute inset-0 bg-gradient-to-t from-night-900 via-transparent to-transparent md:bg-gradient-to-r" />
-                        <div
-                            class="absolute bottom-4 left-4 rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] backdrop-blur"
-                            :style="{ color: meta.color, backgroundColor: meta.soft, border: `1px solid ${meta.border}` }"
-                        >
-                            {{ meta.label }} · {{ character.rarity }}★
-                        </div>
+                        <RarityBadge
+                            class="absolute bottom-4 left-4"
+                            size="lg"
+                            :rarity="character.rarity"
+                            :label="`${meta.label} · ${character.rarity}★`"
+                        />
                     </div>
 
                     <div class="flex flex-1 flex-col overflow-y-auto p-5 sm:p-7">
@@ -141,9 +122,9 @@ onBeforeUnmount(() => {
 
                         <template v-else>
                             <div class="rounded-xl border border-dashed line-strong surface-2 p-4 text-center">
-                                <p class="font-display text-sm text-bone-200">Sello sin descubrir</p>
+                                <p class="font-display text-sm text-bone-200">Figura sin descubrir</p>
                                 <p class="mt-1 text-xs leading-relaxed text-bone-400">
-                                    Este personaje todavía no está en tu colección. Tirá de la máquina para revelar su retrato y su historia.
+                                    Este personaje todavía no está en tu colección. Tirá de la palanca para revelar su retrato y su historia.
                                 </p>
                             </div>
                         </template>

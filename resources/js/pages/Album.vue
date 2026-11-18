@@ -1,8 +1,18 @@
 <script setup>
+/**
+ * Colección completa: filtros por rareza, búsqueda y grilla de figuras.
+ *
+ * Los filtros viven en el cliente porque el plantel es chico (84 figuras) y
+ * así cambiar de rareza no provoca una navegación. `hasFilters` permite
+ * deshabilitar «Limpiar filtros» cuando no hay nada para limpiar: un botón
+ * que no hace nada es ruido visual. El anillo de progreso se dibuja con SVG
+ * porque `stroke-dashoffset` da un movimiento suave sin librerías extra.
+ */
 import { Head, usePage } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 import CharacterCard from '../Components/CharacterCard.vue';
 import CharacterModal from '../Components/CharacterModal.vue';
+import EmptyState from '../Components/EmptyState.vue';
 import RarityStars from '../Components/RarityStars.vue';
 import AppLayout from '../Layouts/AppLayout.vue';
 import { RARITY_ORDER, rarityMeta } from '../lib/rarity';
@@ -61,6 +71,13 @@ const visible = computed(() => {
 
 const circumference = 2 * Math.PI * 46;
 const dashOffset = computed(() => circumference - (completion.value / 100) * circumference);
+const hasFilters = computed(() => search.value.trim() !== '' || filter.value !== 'all' || onlyOwned.value);
+
+function clearFilters() {
+    search.value = '';
+    filter.value = 'all';
+    onlyOwned.value = false;
+}
 </script>
 
 <template>
@@ -72,7 +89,7 @@ const dashOffset = computed(() => circumference - (completion.value / 100) * cir
         <section class="mx-auto max-w-6xl px-4 pb-8 pt-10 sm:px-6 lg:pt-14">
             <div class="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
                 <div>
-                    <p class="eyebrow">El álbum de la patria</p>
+                    <p class="eyebrow">La colección de la patria</p>
                     <h1 class="mt-2 font-display text-3xl font-semibold text-bone-50 sm:text-4xl">Tu colección</h1>
                     <p class="mt-3 max-w-xl text-sm leading-relaxed text-bone-300">
                         {{ ownedCount }} de {{ characters.length }} figuras descubiertas. Cada retrato es una puerta a la historia del Paraguay.
@@ -136,6 +153,7 @@ const dashOffset = computed(() => circumference - (completion.value / 100) * cir
                         class="filter-chip rounded-full border px-3 py-1.5 text-[11px] font-semibold transition"
                         :class="filter === item.key ? 'filter-chip-active' : 'line-soft surface-2 text-bone-300 hover:line-strong'"
                         :data-rarity="item.rarity"
+                        :aria-pressed="filter === item.key"
                         @click="filter = item.key"
                     >
                         {{ item.label }}
@@ -148,6 +166,7 @@ const dashOffset = computed(() => circumference - (completion.value / 100) * cir
                         type="button"
                         class="rounded-full border px-3 py-1.5 text-[11px] font-semibold transition"
                         :class="onlyOwned ? 'border-gold-400/50 bg-gold-400/15 text-gold-200' : 'line-soft surface-2 text-bone-400 hover:text-bone-200'"
+                        :aria-pressed="onlyOwned"
                         @click="onlyOwned = !onlyOwned"
                     >
                         Solo descubiertos
@@ -162,6 +181,7 @@ const dashOffset = computed(() => circumference - (completion.value / 100) * cir
                             v-model="search"
                             type="search"
                             placeholder="Buscar por nombre, rol o época…"
+                            aria-label="Buscar figuras por nombre, rol o época"
                             class="w-full rounded-full border line-soft surface-2 py-2 pl-9 pr-3 text-xs text-bone-100 placeholder:text-bone-400/70 focus:border-gold-400/50 focus:outline-none focus:ring-1 focus:ring-gold-400/40"
                         />
                     </label>
@@ -179,19 +199,20 @@ const dashOffset = computed(() => circumference - (completion.value / 100) * cir
                 />
             </div>
 
-            <div v-else class="flex flex-col items-center justify-center rounded-2xl border border-dashed line-soft px-6 py-20 text-center">
-                <span class="grid h-12 w-12 place-items-center rounded-full border border-gold-400/30 bg-gold-400/10 font-display text-lg text-gold-300">?</span>
-                <p class="mt-4 font-display text-lg text-bone-100">No encontramos figuras</p>
-                <p class="mt-1 max-w-sm text-xs leading-relaxed text-bone-400">
-                    Probá con otro nombre, cambiá la rareza o desactivá el filtro de descubiertos.
-                </p>
-                <button type="button" class="btn-ghost mt-5 px-4 py-2 text-xs" @click="search = ''; filter = 'all'; onlyOwned = false">
-                    Limpiar filtros
-                </button>
-            </div>
+            <EmptyState
+                v-else
+                title="No encontramos figuras"
+                description="Probá con otro nombre, cambiá la rareza o desactivá el filtro de descubiertos."
+            >
+                <template #action>
+                    <button type="button" class="btn-ghost px-4 py-2 text-xs" :disabled="!hasFilters" @click="clearFilters">
+                        Limpiar filtros
+                    </button>
+                </template>
+            </EmptyState>
 
             <p class="mt-8 text-center text-[10px] leading-relaxed text-bone-400/70">
-                Los retratos sin imagen disponible en Wikipedia se muestran con un sello tipográfico.
+                Los retratos sin imagen disponible en Wikipedia se muestran con una figura tipográfica.
             </p>
         </section>
     </AppLayout>

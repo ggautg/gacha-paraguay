@@ -1,7 +1,7 @@
 export const THEMES = [
     {
         id: 'default',
-        name: 'Default',
+        name: 'Predeterminado',
         description: 'Noche guaraní, oro y azul',
         colors: ['#05080b', '#eec25f', '#0038a8'],
         themeColor: '#05080b',
@@ -97,6 +97,20 @@ export function applyTheme(id) {
 
     if (meta) {
         meta.setAttribute('content', theme.themeColor);
+    }
+
+    // El favicon también sigue la paleta: en claro un icono oscuro sobre
+    // papel claro se perdía en la pestaña del navegador.
+    const icon = document.querySelector('link[rel="icon"]');
+
+    if (icon) {
+        const fondo = theme.colors[0].replace('#', '%23');
+        const tinta = theme.colors[1].replace('#', '%23');
+
+        icon.setAttribute(
+            'href',
+            `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='48' fill='${fondo}' stroke='${tinta}' stroke-width='4'/%3E%3Ctext x='50' y='68' font-size='52' text-anchor='middle' fill='${tinta}' font-family='Georgia'%3E%E2%82%B2%3C/text%3E%3C/svg%3E`,
+        );
     }
 
     return theme.id;

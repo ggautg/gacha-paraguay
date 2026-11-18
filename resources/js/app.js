@@ -24,8 +24,10 @@ createInertiaApp({
             .use(plugin)
             .mount(el);
     },
+    // La barra de navegación usa el acento del tema activo en vez de un dorado
+    // fijo: en paletas como Emo o Tereré el dorado se veía fuera de lugar.
     progress: {
-        color: '#eec25f',
+        color: 'rgb(var(--accent-rgb))',
         showSpinner: false,
     },
 });

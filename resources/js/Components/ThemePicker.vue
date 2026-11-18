@@ -1,6 +1,15 @@
 <script setup>
+/**
+ * Selector flotante de las nueve paletas.
+ *
+ * El cambio es instantáneo y se persiste en `localStorage`; no hay petición
+ * al servidor ni spinner. Se cierra con clic externo o Escape para que no
+ * tape el contenido al navegar. Las muestras de color usan `border-soft`
+ * en vez de un anillo negro, que en el tema claro se veía demasiado duro.
+ */
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import { THEMES, applyTheme, getStoredTheme } from '../lib/themes';
+import CloseButton from './CloseButton.vue';
 
 const open = ref(false);
 const current = ref(getStoredTheme());
@@ -45,23 +54,15 @@ onBeforeUnmount(() => {
         <Transition name="theme-pop">
             <div
                 v-if="open"
-                class="absolute bottom-full right-0 mb-3 w-[19rem] overflow-hidden rounded-2xl border line-soft bg-night-900/95 shadow-[0_28px_80px_-30px_rgba(0,0,0,0.95)] backdrop-blur-xl"
+                class="absolute bottom-full right-0 mb-3 w-[19rem] overflow-hidden rounded-2xl border line-soft bg-night-900/95 backdrop-blur-xl"
+                style="box-shadow: var(--panel-shadow)"
             >
                 <div class="flex items-center justify-between gap-3 border-b line-soft px-4 py-3">
                     <div>
                         <p class="eyebrow">Paleta</p>
                         <p class="mt-0.5 font-display text-sm font-semibold text-bone-50">Temas de la casa</p>
                     </div>
-                    <button
-                        type="button"
-                        class="grid h-7 w-7 place-items-center rounded-full border line-soft text-bone-300 transition hover:border-gold-400/50 hover:text-gold-300"
-                        aria-label="Cerrar selector de temas"
-                        @click="open = false"
-                    >
-                        <svg viewBox="0 0 24 24" class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
-                            <path d="M6 6l12 12M18 6L6 18" stroke-linecap="round" />
-                        </svg>
-                    </button>
+                    <CloseButton size="sm" label="Cerrar selector de temas" @click="open = false" />
                 </div>
 
                 <div class="grid max-h-[60vh] grid-cols-2 gap-1.5 overflow-y-auto p-3">
@@ -83,8 +84,8 @@ onBeforeUnmount(() => {
                             <span
                                 v-for="color in theme.colors"
                                 :key="color"
-                                class="h-3.5 w-3.5 rounded-full ring-1 ring-black/30"
-                                :style="{ backgroundColor: color }"
+                                class="h-3.5 w-3.5 rounded-full"
+                                :style="{ backgroundColor: color, boxShadow: '0 0 0 1px var(--border-strong)' }"
                             />
                         </span>
                         <span class="min-w-0 flex-1 truncate text-[11px] font-semibold leading-tight" :class="current === theme.id ? 'text-gold-200' : 'text-bone-200'">
@@ -112,7 +113,8 @@ onBeforeUnmount(() => {
 
         <button
             type="button"
-            class="group relative grid h-12 w-12 place-items-center rounded-full border border-gold-400/40 bg-night-900/90 text-gold-300 shadow-[0_18px_40px_-18px_rgba(0,0,0,0.9)] backdrop-blur transition hover:-translate-y-0.5 hover:border-gold-400/70 hover:text-gold-200"
+            class="group relative grid h-12 w-12 place-items-center rounded-full border border-gold-400/40 bg-night-900/90 text-gold-300 backdrop-blur transition hover:-translate-y-0.5 hover:border-gold-400/70 hover:text-gold-200"
+            style="box-shadow: var(--panel-shadow)"
             :aria-expanded="open"
             aria-haspopup="true"
             :aria-label="`Elegir tema · actual: ${active.name}`"

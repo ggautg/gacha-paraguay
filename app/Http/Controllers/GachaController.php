@@ -12,8 +12,23 @@ use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
 
+/**
+ * Controlador de la pantalla principal y de las acciones de juego: tirar y cobrar la bonificación.
+ *
+ * Valida la entrada HTTP, recupera el jugador que inyectó el middleware y delega el
+ * azar y la economía en GachaService. Las reglas en sí no viven aquí para que el
+ * mismo flujo pueda reutilizarse desde otro punto de entrada.
+ */
 class GachaController extends Controller
 {
+    /**
+     * Muestra las últimas tiradas y una vitrina de los hallazgos más recientes.
+     *
+     * El orden de "actualizado más recientemente" se conserva en las claves de la
+     * colección y se reaplica después del whereIn(), porque SQL no garantiza orden
+     * para conjuntos de IDs. La vitrina pasa por toCard() para no filtrar datos de
+     * personajes todavía no descubiertos.
+     */
     public function index(Request $request): Response
     {
         $player = $this->player($request);
@@ -48,6 +63,13 @@ class GachaController extends Controller
         ]);
     }
 
+    /**
+     * Valida el count permitido y delega la tirada al servicio de dominio.
+     *
+     * Restringir el valor a 1 o a multi_pull evita que un count manipulado cambie
+     * el precio. El resultado viaja en el flash de sesión para que la animación de
+     * revelado sobreviva a la redirección y no se repita al recargar (POST/Redirect/GET).
+     */
     public function pull(Request $request, GachaService $gacha): RedirectResponse
     {
         $validated = $request->validate([
@@ -61,6 +83,13 @@ class GachaController extends Controller
             ->with('pull', $result);
     }
 
+    /**
+     * Acredita la bonificación de monedas respetando el cooldown del jugador.
+     *
+     * canClaimBonus() decide en función de bonus_claimed_at y se persiste la marca
+     * de tiempo apenas se cobra: así una recarga o un doble clic no pueden otorgar
+     * la bonificación dos veces.
+     */
     public function bonus(Request $request): RedirectResponse
     {
         $player = $this->player($request);
@@ -80,6 +109,12 @@ class GachaController extends Controller
         return back()->with('message', '¡Recibiste '.Salary::format($coins).' ('.Salary::guaranies($coins).')!');
     }
 
+    /**
+     * Recupera el jugador que EnsurePlayer colocó en los atributos de la request.
+     *
+     * Centralizar esta lectura evita repetir la llave del atributo en cada acción
+     * y hace explícito que la identidad es responsabilidad del middleware.
+     */
     private function player(Request $request): Player
     {
         return $request->attributes->get('player');

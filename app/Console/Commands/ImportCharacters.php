@@ -15,6 +15,14 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use RuntimeException;
 
+/**
+ * Comando Artisan que puebla el catálogo de personajes desde Wikipedia.
+ *
+ * El plantel (nombres, roles, rarezas) vive en config/gachapon.php; este comando
+ * solo resuelve el artículo y el retrato de cada entrada. Distingue la importación
+ * normal de la curada —personajes sin artículo, con texto escrito a mano— y permite
+ * reintentos parciales para no repetir trabajo de red ya realizado.
+ */
 class ImportCharacters extends Command
 {
     protected $signature = 'gacha:import
@@ -29,6 +37,15 @@ class ImportCharacters extends Command
 
     private const USER_AGENT = 'GachaGuarani/1.0 (proyecto local de demostración)';
 
+    /**
+     * Importa el plantel en lotes de 20 para no saturar la API de Wikipedia.
+     *
+     * Las combinaciones de opciones incompatibles se rechazan antes de tocar la base
+     * de datos. Con --fresh, catálogo y progreso se reinician en una sola transacción
+     * para no dejar estados a medias. Los retratos ya guardados se conservan siempre:
+     * --missing limita la descarga a las fichas sin imagen, porque repetirla es lento
+     * y consume cuota de Wikimedia sin aportar nada.
+     */
     public function handle(): int
     {
         $roster = collect(config('gachapon.roster'));
@@ -89,6 +106,7 @@ class ImportCharacters extends Command
         $onlyMissing = (bool) $this->option('missing');
 
         foreach ($roster->chunk(20) as $chunk) {
+            // Wikipedia acepta hasta 20 títulos por consulta, de ahí el tamaño del lote.
             $wikiTitles = $chunk->pluck('wiki')->filter()->values()->all();
             $pages = $wikiTitles === [] ? [] : $this->fetchPages($wikiTitles);
 
@@ -116,6 +134,7 @@ class ImportCharacters extends Command
 
                 if (! $this->option('no-images') && (! $onlyMissing || ! $imagePath)) {
                     $imagePath = $this->downloadImage($page['thumbnail']['source'] ?? null, $slug) ?? $imagePath;
+                    // Pausa entre retratos para no superar el límite de peticiones de Wikimedia.
                     usleep(400_000);
                 }
 
@@ -143,6 +162,7 @@ class ImportCharacters extends Command
             }
 
             if ($wikiTitles !== []) {
+                // Respiro entre lotes de la API, además del aplicado a cada imagen.
                 usleep(250_000);
             }
         }
@@ -161,6 +181,10 @@ class ImportCharacters extends Command
 
     /**
      * Inserta o actualiza un personaje curado a mano (sin artículo de Wikipedia).
+     *
+     * Algunas entradas del plantel no tienen artículo resoluble, así que el texto y
+     * el enlace biográficos se toman directamente de la configuración. Conserva el
+     * retrato ya guardado para no perderlo en reimportaciones posteriores.
      *
      * @param  array<string, mixed>  $spec
      */
@@ -193,6 +217,12 @@ class ImportCharacters extends Command
     }
 
     /**
+     * Consulta la API en lotes y reintenta con espera creciente ante fallos de red.
+     *
+     * Wikipedia normaliza títulos y aplica redirecciones, por eso se indexan las
+     * páginas por título y se mapean de ida y vuelta: sin ese paso, los nombres del
+     * plantel con mayúsculas o redirección caerían como "sin artículo".
+     *
      * @param  array<int, string>  $titles
      * @return array<string, array<string, mixed>>
      */
@@ -236,6 +266,7 @@ class ImportCharacters extends Command
         }
 
         $query = $response->json('query', []);
+        // keyBy permite resolver cada título en O(1) en vez de buscarlo en la lista.
         $byTitle = collect($query['pages'] ?? [])->keyBy('title');
 
         $normalized = collect($query['normalized'] ?? [])->pluck('to', 'from');
@@ -256,6 +287,10 @@ class ImportCharacters extends Command
     }
 
     /**
+     * Devuelve la página resuelta o null cuando Wikipedia marca el artículo como ausente.
+     *
+     * Distinguir "no existe" de "sin extracto" evita crear fichas vacías en el catálogo.
+     *
      * @param  array<string, array<string, mixed>>  $pages
      * @return array<string, mixed>|null
      */
@@ -270,6 +305,13 @@ class ImportCharacters extends Command
         return $page;
     }
 
+    /**
+     * Descarga el retrato con reintentos y respeta los límites de Wikimedia.
+     *
+     * La espera es mucho mayor después de un 429 porque el servicio limita por IP.
+     * El Accept amplio permite recibir AVIF o WebP sin dependencias extra en el servidor;
+     * una respuesta demasiado pequeña se descarta porque suele ser una página de error.
+     */
     private function downloadImage(?string $url, string $slug): ?string
     {
         if (! $url) {
@@ -311,6 +353,12 @@ class ImportCharacters extends Command
         return null;
     }
 
+    /**
+     * Guarda la imagen bajo characters/<slug> y normaliza la extensión del archivo.
+     *
+     * Se fuerza jpg como valor por defecto porque la URL de la miniatura no siempre
+     * expone una extensión reconocible; así la ruta almacenada es predecible.
+     */
     private function storeImage(Response $response, string $url, string $slug): string
     {
         $extension = strtolower(pathinfo((string) parse_url($url, PHP_URL_PATH), PATHINFO_EXTENSION));
@@ -323,6 +371,12 @@ class ImportCharacters extends Command
         return $path;
     }
 
+    /**
+     * Recorta el extracto a 560 caracteres buscando un punto de corte natural.
+     *
+     * Quita las referencias numéricas "[1]" que Wikipedia inyecta y evita truncar a
+     * mitad de frase. Se usan funciones mb_* para no partir caracteres con tilde o ñ.
+     */
     private function summarize(string $text): string
     {
         $text = preg_replace('/\s+/u', ' ', trim($text)) ?? '';

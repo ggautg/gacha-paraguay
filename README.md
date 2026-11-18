@@ -4,6 +4,8 @@ Un gachapón web de figuras históricas del Paraguay. Cada tirada revela un retr
 
 Construido con **Laravel 13 + Inertia 3 + Vue 3 + Tailwind CSS 4**.
 
+Documentación detallada: [registro de cambios](CHANGELOG.md) · [arquitectura](docs/ARQUITECTURA.md).
+
 ---
 
 ## ¿Cómo funciona?
@@ -18,8 +20,8 @@ Construido con **Laravel 13 + Inertia 3 + Vue 3 + Tailwind CSS 4**.
   - Bonificación: **+1 SM** cada **8 horas**.
   - Duplicados devuelven un porcentaje de la tirada: **20 % / 60 % / 100 %** según rareza (común, épico, legendario).
 - **Probabilidades por tirada**: común **65 %**, épico **27 %**, legendario **8 %**.
-- **Pity**: si pasan **12 tiradas** sin un legendario, la siguiente lo garantiza.
-- **Álbum**: la colección muestra las 84 figuras; las no descubiertas aparecen como siluetas. Los duplicados aumentan la cantidad y se pueden filtrar por rareza.
+- **Garantía**: si pasan **12 tiradas** sin un legendario, la siguiente lo garantiza.
+- **Colección**: muestra las 84 figuras; las no descubiertas aparecen como siluetas. Los duplicados aumentan la cantidad y se pueden filtrar por rareza.
 - **Tirar de vuelta**: el revelado incluye un botón para repetir la misma tirada (×1 o ×10) sin volver a la máquina; se deshabilita si no alcanza el saldo.
 
 ## Temas
@@ -28,7 +30,7 @@ La interfaz incluye un selector flotante (esquina inferior derecha) con nueve pa
 
 | # | Tema | Inspiración |
 | --- | --- | --- |
-| 1 | **Default** | Noche guaraní, oro y azul |
+| 1 | **Predeterminado** | Noche guaraní, oro y azul |
 | 2 | **Claro** | Papel, tinta y sol de mediodía |
 | 3 | **Tereré** | Yerba fresca, guampa y monte |
 | 4 | **Larissa Riquelme** | Rosa pasarela y oro |
@@ -38,7 +40,7 @@ La interfaz incluye un selector flotante (esquina inferior derecha) con nueve pa
 | 8 | **Mandioca** | Tierra, raíz y almidón |
 | 9 | **Emo 2007** | Negro, flequillo y rosa chicle |
 
-Cada paleta redefine los tokens de color (`night`, `bone`, `gold`), el degradado del fondo, la selección de texto y el color de `theme-color`. El tema elegido se guarda en `localStorage` con la clave `gacha-theme` y se aplica antes del primer render con un script inline en `resources/views/app.blade.php` (sin parpadeo). Los metadatos de las paletas y la persistencia viven en `resources/js/lib/themes.js`.
+Cada paleta redefine los tokens de color (`night`, `bone`, `gold`), el degradado del fondo, la selección de texto, el color de `theme-color` y el del favicon. El tema elegido se guarda en `localStorage` con la clave `gacha-theme` y se aplica antes de mostrar la interfaz con un script en línea en `resources/views/app.blade.php` (sin parpadeo). Los metadatos de las paletas y la persistencia viven en `resources/js/lib/themes.js`.
 
 ## Stack
 
@@ -103,7 +105,7 @@ php artisan gacha:import --only=menchi-barriocanal,carlos-martini  # solo esos s
 php artisan gacha:import --fresh    # borra catálogo y progreso, y reinicia jugadores
 ```
 
-Los personajes sin artículo en Wikipedia (por ejemplo, figuras de la farándula o de TikTok) se definen en el mismo plantel con `'wiki' => null` y sus datos curados (`extract`, `link`, `role`, `era`, `category`, `rarity`). El comando los inserta sin consultar la API y conserva el retrato si ya existía.
+Los personajes sin artículo en Wikipedia (por ejemplo, figuras de la farándula o de TikTok) se definen en el mismo plantel con `'wiki' => null` y sus datos preparados a mano (`extract`, `link`, `role`, `era`, `category`, `rarity`). El comando los inserta sin consultar la API y conserva el retrato si ya existía.
 
 El comando:
 
@@ -122,19 +124,29 @@ El plantel, la economía y las probabilidades se editan en [`config/gachapon.php
 app/
   Console/Commands/ImportCharacters.php   # importador de Wikipedia
   Http/Controllers/GachaController.php    # home, tiradas, bonificación
-  Http/Controllers/AlbumController.php    # álbum de colección
+  Http/Controllers/AlbumController.php    # colección de figuras
   Http/Middleware/EnsurePlayer.php        # identidad por cookie
   Models/{Character,Player,CollectionEntry,Pull}.php
   Services/GachaService.php               # rareza, pity, duplicados, transacción
   Support/GachaPresenter.php              # forma de los datos para Vue
-config/gachapon.php                       # plantel + economía + tasas
+config/gachapon.php                       # plantel + economía + probabilidades
 resources/
   css/app.css                             # tokens, 9 paletas, máquina y animaciones
   js/pages/Home.vue                       # máquina, probabilidades, vitrina
   js/pages/Album.vue                      # grilla, filtros, buscador, modal
+  js/Components/CharacterPortrait.vue     # imagen con respaldo ante URLs rotas
+  js/Components/RarityBadge.vue           # color + etiqueta + estrellas
+  js/Components/CloseButton.vue           # cierre uniforme de overlays
+  js/Components/EmptyState.vue            # estados vacíos reutilizables
+  js/Components/ProgressBar.vue           # barras accesibles y temáticas
+  js/Components/PanelHeader.vue           # encabezados de panel
+  js/Components/StatCard.vue              # tarjetas de estadísticas
   js/Components/PullReveal.vue            # overlay de revelado
   js/Components/ThemePicker.vue           # selector flotante de paletas
+  js/composables/useDismissableOverlay.js # Escape + bloqueo de scroll
   js/lib/themes.js                        # metadatos y persistencia del tema
+CHANGELOG.md                              # cada cambio explicado
+docs/ARQUITECTURA.md                      # mapa de capas y flujos
 database/migrations/2026_10_23_000001_create_gachapon_tables.php
 tests/Feature/GachaTest.php               # 10 pruebas del flujo completo
 ```
@@ -145,7 +157,7 @@ tests/Feature/GachaTest.php               # 10 pruebas del flujo completo
 php artisan test
 ```
 
-Cubren render de la home y el álbum, cobro de sueldos, precio múltiple, devolución por duplicado, pity, saldo insuficiente y bonificación diaria única.
+Cubren la carga de la home y la colección, cobro de sueldos, precio múltiple, devolución por duplicado, garantía, saldo insuficiente y bonificación diaria única.
 
 ## Créditos y licencia
 

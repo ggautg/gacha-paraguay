@@ -9,10 +9,22 @@ use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\Response;
 
+/**
+ * Middleware que identifica al jugador de forma anónima con una cookie persistente.
+ *
+ * El juego no exige registro: una cookie UUID de dos años identifica al coleccionista
+ * y crea un Player con el saldo inicial la primera vez. Dejar el modelo en los atributos
+ * de la request evita que cada controlador repita la búsqueda por token.
+ */
 class EnsurePlayer
 {
     /**
      * Identifica al jugador con una cookie de larga duración y lo crea si no existe.
+     *
+     * La vigencia de dos años permite que el progreso sobreviva a cierres del navegador.
+     * Se usa un UUID en lugar de un ID incremental para no adivinar ni exponer cuántos
+     * jugadores hay; si la cookie apunta a un registro borrado, se emite una identidad
+     * nueva en vez de fallar la petición.
      */
     public function handle(Request $request, Closure $next): Response
     {

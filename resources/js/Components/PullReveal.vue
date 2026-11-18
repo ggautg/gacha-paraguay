@@ -1,8 +1,20 @@
 <script setup>
-import { computed, onBeforeUnmount, onMounted } from 'vue';
+/**
+ * Pantalla completa con el resultado de una tirada.
+ *
+ * Muestra cada figura revelada, el resumen económico (gasto, reembolso por
+ * duplicados y saldo) y la acción de repetir la tirada sin volver a la home.
+ *
+ * El cierre queda bloqueado mientras `busy` es verdadero: si el overlay se
+ * cerrara a mitad de la petición, el `watch` de Home volvería a abrirlo al
+ * llegar la respuesta y el usuario vería un parpadeo confuso.
+ */
+import { computed } from 'vue';
 import { formatCoins, rarityMeta } from '../lib/rarity';
-import PortraitFallback from './PortraitFallback.vue';
-import RarityStars from './RarityStars.vue';
+import { useDismissableOverlay } from '../composables/useDismissableOverlay';
+import CharacterPortrait from './CharacterPortrait.vue';
+import CloseButton from './CloseButton.vue';
+import RarityBadge from './RarityBadge.vue';
 
 const props = defineProps({
     pull: { type: Object, required: true },
@@ -16,11 +28,12 @@ const emit = defineEmits(['close', 'again']);
 const results = computed(() => props.pull?.results ?? []);
 const summary = computed(() => props.pull?.summary ?? {});
 const isMulti = computed(() => results.value.length > 1);
-const bestRarity = computed(() => Math.max(0, ...results.value.map((result) => result.rarity)));
 const hasLegendary = computed(() => results.value.some((result) => result.rarity === 3));
 
 function close() {
-    emit('close');
+    if (!props.busy) {
+        emit('close');
+    }
 }
 
 function again() {
@@ -31,26 +44,13 @@ function again() {
     emit('again');
 }
 
-function onKeydown(event) {
-    if (event.key === 'Escape') {
-        close();
-    }
-}
-
-onMounted(() => {
-    document.body.style.overflow = 'hidden';
-    window.addEventListener('keydown', onKeydown);
-});
-
-onBeforeUnmount(() => {
-    document.body.style.overflow = '';
-    window.removeEventListener('keydown', onKeydown);
-});
+// Escape y bloqueo de scroll delegados al composable compartido.
+useDismissableOverlay({ active: () => true, onEscape: close });
 </script>
 
 <template>
     <Teleport to="body">
-        <div class="fixed inset-0 z-50 flex flex-col bg-night-950/92 backdrop-blur-xl">
+        <div class="fixed inset-0 z-50 flex flex-col bg-night-950/92 backdrop-blur-xl" role="dialog" aria-modal="true" aria-label="Resultado de la tirada">
             <div class="pointer-events-none absolute inset-0 overflow-hidden">
                 <div class="absolute left-1/2 top-0 h-[420px] w-[720px] -translate-x-1/2 rounded-full bg-gold-400/10 blur-[120px]" />
                 <div class="absolute bottom-0 right-0 h-[320px] w-[420px] rounded-full bg-flag-blue/15 blur-[120px]" />
@@ -60,20 +60,11 @@ onBeforeUnmount(() => {
                 <div>
                     <p class="eyebrow">Resultado de la tirada</p>
                     <h2 class="mt-1 font-display text-lg text-bone-50 sm:text-2xl">
-                        <template v-if="results.length === 1">Un nuevo sello para tu colección</template>
-                        <template v-else>{{ results.length }} sellos revelados</template>
+                        <template v-if="results.length === 1">Una nueva figura para tu colección</template>
+                        <template v-else>{{ results.length }} figuras reveladas</template>
                     </h2>
                 </div>
-                <button
-                    type="button"
-                    class="grid h-10 w-10 shrink-0 place-items-center rounded-full border line-strong surface-2 text-bone-200 transition hover:border-gold-400/60 hover:text-gold-300"
-                    aria-label="Cerrar"
-                    @click="close"
-                >
-                    <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M6 6l12 12M18 6L6 18" stroke-linecap="round" />
-                    </svg>
-                </button>
+                <CloseButton label="Cerrar resultado de la tirada" @click="close" />
             </div>
 
             <div class="relative flex-1 overflow-y-auto px-4 pb-6 sm:px-8">
@@ -104,28 +95,12 @@ onBeforeUnmount(() => {
                         />
 
                         <div class="relative aspect-[3/4] overflow-hidden">
-                            <img
-                                v-if="result.image"
-                                :src="result.image"
-                                :alt="`Retrato de ${result.name}`"
-                                class="h-full w-full object-cover object-top"
-                            />
-                            <PortraitFallback v-else :name="result.name" owned />
+                            <CharacterPortrait :image="result.image" :name="result.name" owned />
 
                             <div class="absolute inset-0 bg-gradient-to-t from-night-950 via-night-950/25 to-transparent" />
 
                             <div class="absolute inset-x-2 top-2 flex items-start justify-between gap-1">
-                                <span
-                                    class="rounded-full px-2 py-0.5 text-[8px] font-bold uppercase tracking-[0.15em] backdrop-blur"
-                                    :style="{
-                                        color: rarityMeta(result.rarity).color,
-                                        backgroundColor: rarityMeta(result.rarity).soft,
-                                        border: `1px solid ${rarityMeta(result.rarity).border}`,
-                                    }"
-                                >
-                                    {{ rarityMeta(result.rarity).label }}
-                                </span>
-                                <RarityStars :rarity="result.rarity" />
+                                <RarityBadge :rarity="result.rarity" size="xs" />
                             </div>
 
                             <span
@@ -180,19 +155,19 @@ onBeforeUnmount(() => {
                         <button
                             type="button"
                             class="btn-ghost px-5 py-2.5 text-sm"
-                            :class="{ 'opacity-50': !canAgain }"
+                            :class="{ 'opacity-50': !canAgain, 'animate-pulse': busy }"
                             :disabled="busy || !canAgain"
-                            :title="canAgain ? `Repetir la tirada por ${formatCoins(price)}` : 'No te alcanza el saldo para repetir'"
+                            :title="busy ? 'Tirada en curso…' : canAgain ? `Repetir la tirada por ${formatCoins(price)}` : 'No te alcanza el saldo para repetir'"
                             @click="again"
                         >
                             <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8">
                                 <path d="M20 11a8 8 0 10-2.34 5.66M20 4v7h-7" stroke-linecap="round" stroke-linejoin="round" />
                             </svg>
-                            <span>Tirar de vuelta ×{{ results.length }}</span>
+                            <span>{{ busy ? 'Tirando…' : `Tirar de vuelta ×${results.length}` }}</span>
                             <span class="text-[11px] tabular-nums text-bone-400">{{ formatCoins(price) }}</span>
                         </button>
-                        <button type="button" class="btn-gold w-full px-8 py-2.5 text-sm sm:w-auto" @click="close">
-                            Continuar
+                        <button type="button" class="btn-gold w-full px-8 py-2.5 text-sm sm:w-auto" :disabled="busy" @click="close">
+                            {{ busy ? 'Un momento…' : 'Continuar' }}
                         </button>
                     </div>
                 </div>
@@ -211,7 +186,7 @@ onBeforeUnmount(() => {
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(100deg, transparent 25%, rgba(255, 240, 190, 0.28) 50%, transparent 75%);
+    background: linear-gradient(100deg, transparent 25%, rgb(var(--accent-rgb) / 0.28) 50%, transparent 75%);
     transform: translateX(-140%) skewX(-18deg);
     animation: shine-sweep 2.8s ease-in-out 0.9s infinite;
     pointer-events: none;

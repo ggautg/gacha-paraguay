@@ -13,7 +13,7 @@ const title = computed(() => `${label.value} · ${formatGuaranies(props.coins)}`
 
 <template>
     <span
-        class="inline-flex items-center gap-2 rounded-full border border-gold-400/30 bg-gold-400/10 py-1 pl-1 pr-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]"
+        class="inline-flex items-center gap-2 rounded-full border border-gold-400/30 bg-gold-400/10 py-1 pl-1 pr-3"
         :title="title"
     >
         <span
