@@ -1,8 +1,10 @@
 # Registro de cambios
 
-Este archivo explica **qué se cambió y por qué** en la revisión integral del sistema. Para el mapa técnico de archivos y flujos, mirá [`docs/ARQUITECTURA.md`](docs/ARQUITECTURA.md).
+Este archivo explica **qué se cambió y por qué** en la revisión integral del sistema. Para el mapa técnico de archivos y flujos, mirá [`docs/ARQUITECTURA.md`](docs/ARQUITECTURA.md); para las reglas que deben respetar los agentes, [`AGENTS.md`](AGENTS.md).
 
-## Revisión integral (10 frentes)
+La sección siguiente es el registro histórico de una revisión anterior. Los datos de entorno y de verificación que aparecían allí **no se dieron por válidos**: se reverificaron en esta sesión y se corrigen en la [Revisión de los 12 frentes](#revisión-de-los-12-frentes-noviembre-de-2026).
+
+## Revisión integral anterior (10 frentes — registro histórico)
 
 ### 1. Coherencia de UI/UX
 
@@ -39,8 +41,8 @@ Este archivo explica **qué se cambió y por qué** en la revisión integral del
 ### 4. MySQL
 
 - Verificado `MySQL 8.0.35` con usuario `root` y la credencial indicada, base `gacha_paraguay` presente.
-- Sin cambios de esquema: solo se ajustaron tres filas de texto para reflejar las correcciones del plantel.
-- No hizo falta instalar dependencias: Composer 2.10.2 y npm 11.20.0 ya estaban disponibles con `vendor/` y `node_modules/` instalados.
+- Registro histórico: en aquella oportunidad no se cambió el esquema; en la revisión actual sí se agregó la migración de `sessions` (ver punto 4 nuevo).
+- Registro histórico: en aquella oportunidad las dependencias ya estaban instaladas; en la revisión actual `vendor/` y `node_modules/` no existían y se instalaron (ver punto 10 nuevo).
 
 ### 5. Temas coherentes
 
@@ -98,9 +100,9 @@ Se documentaron los 15 archivos de `app/`, explicando decisiones como:
 - cooldown derivado de `bonus_claimed_at`;
 - resolución de redirecciones de Wikipedia y pausas ante HTTP 429 en el importador;
 - agregaciones en SQL en vez de cargar toda la colección en PHP;
-- props de Inertia diferidas en `HandleInertiaRequests`.
+- props de Inertia compartidas como closure en `HandleInertiaRequests` (no `lazy()`, porque ambas páginas las necesitan en la carga inicial).
 
-**No se cambió ninguna línea de lógica** en `app/`: solo comentarios y docblocks. `php -l` pasó en los 15 archivos.
+En aquella revisión no se cambió lógica en `app/`: solo comentarios y docblocks. En la revisión actual sí se ajustó `GachaController::bonus()` (ver punto 4 nuevo). `php -l` volvió a pasar en los archivos tocados.
 
 ### 10. npm / Composer
 
@@ -110,10 +112,107 @@ No hizo falta bajar nada: las dependencias ya estaban instaladas y funcionando. 
 
 - **Santiago Peña**: 3★ con el rol «Expresidente · destituido en 2026», tanto en `config/gachapon.php` como en la base de datos. README actualizado a 18 legendarias / 33 épicas / 33 comunes.
 
-## Verificación final
+## Verificación de la revisión anterior (registro histórico)
 
-- `npm run build`: OK (639 módulos, sin errores).
+- `npm run build`: OK (639 módulos en aquel momento).
 - `php artisan test --ansi`: 10 pruebas, 55 aserciones, OK.
 - `php -l` en los 15 archivos de `app/`: OK.
 - `git diff --check`: sin errores de whitespace.
-- Servidor de desarrollo levantado y cerrado a pedido; MySQL permanece disponible.
+
+Los números y condiciones reales de esta sesión están en la sección siguiente.
+
+---
+
+## Revisión de los 12 frentes (noviembre de 2026)
+
+Esta es la revisión verificada en esta sesión. Se hizo el reconocimiento completo antes de editar y cada cambio se validó con build, pruebas y `php -l`.
+
+### 1. Coherencia de UI/UX
+
+- La home dejó de armar paneles a mano: `RarityRates`, `ShowcasePanel` y `RecentPullsPanel` repiten el mismo patrón visual y usan `PanelHeader`, `EmptyState`, `ProgressBar` y `RarityStars`.
+- La colección usa `CollectionFilters` y `CollectionProgress`; el botón «Limpiar» aparece deshabilitado cuando no hay filtros activos y comparte la misma acción que el estado vacío.
+- El toast salió de `AppLayout` y pasó a `ToastNotice.vue`: un solo componente escucha `flash.message`, lo anuncia y se cierra con `role="status"`.
+- Se eliminó `resources/views/welcome.blade.php` (72 KB de plantilla de Laravel que ninguna ruta usa). Como Tailwind escaneaba ese archivo, el CSS compilado pasó de 84,29 kB a 62,12 kB (11,43 kB gzip) sin perder clases usadas.
+
+### 2. Movimiento fácil para el ojo humano
+
+- La máquina completa (domo, cápsulas, palanca, perno, sacudida) se mudó a `GachaMachine.vue` con su CSS. Sigue moviéndose solo mientras hay una petición en curso.
+- Se bajó la amplitud y la frecuencia de las animaciones decorativas: `float-soft` de 10 px/6 s a 6 px/9 s, `sparkle` de 3,2 s a 4,8 s con opacidad máxima 0,8. Menos vaivén, misma personalidad.
+- Se conservó `prefers-reduced-motion` y el revelado sigue bloqueando el cierre durante la petición para evitar parpadeos al usar «Tirar de vuelta».
+
+### 3. Español perfecto
+
+- El error de saldo ahora dice «Saldo insuficiente: reclamá la bonificación o volvé más tarde.» en vez de «Te faltan monedas…», coherente con la moneda SM.
+- `BonusClaim.vue` usa «Reclamando…», «Disponible en …» y «Reclamar bonificación»; `GachaMachine.vue` anuncia «Máquina lista para tirar» / «Tirando…».
+- Se corrigió el docblock de `ShowcasePanel.vue` («solo coordine datos») y la mayúscula inicial del docblock de `AppLayout.vue`.
+- No se encontraron secuencias mojibake (`Ã`, `Â`, `â€`) en los archivos revisados.
+
+### 4. MySQL y arranque
+
+- MySQL 8.0.35 respondió con `root` y la credencial indicada; base `gacha_paraguay` con 84 personajes y sus tablas.
+- No existía `.env`: se creó desde `.env.example`, se seteó `DB_PASSWORD` con la credencial local y se generó `APP_KEY`. El archivo sigue ignorado por Git.
+- **Error real encontrado:** `.env.example` define `SESSION_DRIVER=database` pero no había migración de `sessions`. Se agregó `database/migrations/0001_01_01_000003_create_sessions_table.php`, con guard para no recrear una tabla ya existente. Migración ejecutada con éxito.
+- **Error real encontrado:** la bonificación se acreditaba sin bloqueo; dos peticiones simultáneas podían cobrar dos veces. `GachaController::bonus()` ahora abre `DB::transaction()`, vuelve a leer al jugador con `lockForUpdate()` y valida elegibilidad dentro del bloqueo; si no corresponde, lanza `ValidationException` y se revierte todo.
+- `php artisan storage:link` ejecutado; enlace público conectado.
+
+### 5. Temas de color coherentes
+
+- El selector (`ThemePicker.vue`) y las nueve paletas siguen funcionando con tokens; los componentes nuevos no introducen colores fijos.
+- `GachaMachine.vue` usa `--color-flag-red`, `--color-flag-blue`, `--accent-rgb` y `--accent-surface-*` en lugar de hexadecimales propios.
+- Los mensajes de error usan `text-flag-red` (token de la paleta) en vez de una clase `text-danger` inexistente que no habría mostrado color.
+- Se mantuvieron `theme-color`, favicon dinámico y la barra de progreso de Inertia con `rgb(var(--accent-rgb))`.
+
+### 6. Carga y formularios simples, intuitivos y fluidos
+
+- `PullControls.vue` concentra los dos botones, el precio, el `title` explicativo, `aria-busy`, el error junto a la acción y la nota del sueldo mínimo.
+- `BonusClaim.vue` concentra el `setInterval` de la cuenta regresiva y lo limpia en `onBeforeUnmount`; antes vivía en la página principal.
+- `ToastNotice.vue` cancela su temporizador al cerrar y al desmontar.
+- La navegación no muestra spinner (`showSpinner: false`) y usa el color del tema activo.
+
+### 7. Componentización Vue
+
+Componentes nuevos: `GachaMachine.vue`, `PullControls.vue`, `BonusClaim.vue`, `RarityRates.vue`, `ShowcasePanel.vue`, `RecentPullsPanel.vue`, `ToastNotice.vue`, `CollectionProgress.vue` y `CollectionFilters.vue`.
+
+- `Home.vue` pasó de 634 líneas a coordinar datos y acciones; `Album.vue` conserva solo estado y filtrado.
+- Cada componente lleva docblock con el motivo de su extracción y los eventos que emite.
+- Se mantuvieron los componentes ya existentes (`CharacterPortrait`, `RarityBadge`, `CloseButton`, `EmptyState`, `PanelHeader`, `ProgressBar`, `StatCard`, `PullReveal`, `ThemePicker`, `CharacterCard`, `CharacterModal`) y el composable `useDismissableOverlay`.
+
+### 8. Documentación
+
+- `AGENTS.md` nuevo: reglas, arranque, validación, mapa rápido y decisiones que no se deben romper.
+- `docs/ARQUITECTURA.md` actualizado con los componentes nuevos, la transacción de bonificación, la migración de sesiones y la fuente única del sueldo.
+- `README.md` actualizado con el enlace a `AGENTS.md`, los componentes nuevos, el estado local verificado y la aclaración de que la contraseña solo vive en `.env`.
+- `CHANGELOG.md` corrige las afirmaciones no verificadas del registro anterior y agrega esta revisión de 12 frentes.
+
+### 9. Modelos y controladores comentados
+
+- Se conservan los docblocks de los 15 archivos de `app/` (modelos, controladores, middleware, providers, servicio, presentador, soporte y comando).
+- Se amplió el docblock de `GachaController::bonus()` para explicar el bloqueo pesimista y por qué la elegibilidad se vuelve a comprobar dentro de la transacción.
+- Se ajustó el docblock de `HandleInertiaRequests::share()` para describir correctamente el uso de closures (antes decía que se usaba `Inertia::lazy()`).
+- El docblock de `GachaController` sigue explicando validación, delegación en `GachaService` y patrón POST/Redirect/GET.
+
+### 10. npm / Composer
+
+- No había `vendor/` ni `node_modules/`: se ejecutaron `composer install --no-interaction --prefer-dist` (110 paquetes) y `npm install` (110 paquetes).
+- `npm audit` detectó `follow-redirects` 1.16.0–1.16.1 (severidad alta). Se corrigió con `npm audit fix`: **0 vulnerabilidades**.
+- `npm install-scripts approve` no se ejecutó: `esbuild` tiene un script postinstall que Vite no necesita para este build; se dejó como viene por defecto.
+
+### 11. MD de agente eficiente y actualizado
+
+- `AGENTS.md` creado en la raíz con 5 reglas, comandos de arranque, validación obligatoria, tabla de archivos clave y 5 invariantes del sistema.
+- Queda actualizado con el estado real de esta sesión (dependencias instaladas, migración de sesiones, bonificación bloqueada, moneda SM con fuente única).
+
+### 12. Crux Sacra de San Benito
+
+- Recitado antes de comenzar, como pidió el usuario:
+
+  > Crux Sacra sit mihi lux! Non draco sit mihi dux! Vade retro satana! Numquam suade mihi vana! Sunt mala quae libas. Ipse venena bibas.
+
+## Verificación final de esta sesión
+
+- `npm run build`: OK, **649 módulos** transformados, sin errores.
+- `php artisan test`: **10 pruebas / 55 aserciones**, OK.
+- `php -l` en `GachaController.php`, `HandleInertiaRequests.php` y la migración nueva: OK.
+- `php artisan migrate --force`: migración de `sessions` aplicada; `php artisan storage:link`: enlace conectado.
+- `npm audit`: 0 vulnerabilidades.
+- `git diff --check`: sin errores de whitespace.

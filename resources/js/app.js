@@ -2,6 +2,7 @@ import '../css/app.css';
 
 import { createApp, h } from 'vue';
 import { createInertiaApp } from '@inertiajs/vue3';
+import { setSueldoMinimo } from './lib/rarity';
 import { initTheme } from './lib/themes';
 
 initTheme();
@@ -20,6 +21,9 @@ createInertiaApp({
         return page();
     },
     setup({ el, App, props, plugin }) {
+        // El valor inicial de Inertia trae el sueldo de config/gachapon.php.
+        setSueldoMinimo(props.initialPage.props.gacha?.salary?.amount);
+
         createApp({ render: () => h(App, props) })
             .use(plugin)
             .mount(el);

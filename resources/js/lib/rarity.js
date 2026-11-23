@@ -39,17 +39,28 @@ export function formatNumber(value) {
 }
 
 /**
- * Valor del sueldo mínimo vigente (₲ 3.044.000, Decreto 6225/2026).
- * Debe coincidir con `salary.amount` de config/gachapon.php.
+ * Valor del sueldo mínimo usado para convertir guaraníes en SM.
+ *
+ * Se inicializa con el valor vigente y `app.js` lo sobrescribe con
+ * `gacha.salary.amount`, que viene de config/gachapon.php. Así el servidor y
+ * el navegador comparten una sola fuente de verdad cuando cambia el decreto.
  */
-export const SUELDO_MINIMO = 3044000;
+let sueldoMinimo = 3044000;
+
+export function setSueldoMinimo(amount) {
+    const valor = Number(amount);
+
+    if (valor > 0) {
+        sueldoMinimo = valor;
+    }
+}
 
 export function formatGuaranies(value) {
     return `₲ ${formatNumber(value)}`;
 }
 
 export function formatSueldos(value) {
-    const sueldos = (Number(value) || 0) / SUELDO_MINIMO;
+    const sueldos = (Number(value) || 0) / sueldoMinimo;
     const label = new Intl.NumberFormat('es-PY', {
         minimumFractionDigits: Number.isInteger(sueldos) ? 0 : 1,
         maximumFractionDigits: 2,

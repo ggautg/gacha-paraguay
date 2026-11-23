@@ -41,10 +41,11 @@ class HandleInertiaRequests extends Middleware
     /**
      * Define las props que se comparten por defecto en todas las respuestas Inertia.
      *
-     * El jugador se envía como closure para que se evalúe de forma diferida: las
-     * respuestas parciales que no lo necesitan no pagan el costo de recalcular su
-     * colección. Los valores de gachapon salen de config para que el frontend aplique
-     * exactamente las mismas reglas que el servidor.
+     * El jugador se envía como closure para que Inertia lo resuelva en cada
+     * respuesta y siempre refleje el saldo vigente. No se usa Inertia::lazy()
+     * porque las dos páginas lo necesitan en la carga inicial. Los valores de
+     * gachapon salen de config para que el frontend aplique exactamente las
+     * mismas reglas que el servidor.
      *
      * @see https://inertiajs.com/shared-data
      *

@@ -1,0 +1,37 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+/**
+ * Crea la tabla de sesiones que exige SESSION_DRIVER=database.
+ *
+ * Sin esta tabla, una instalación nueva responde 500 en la primera petición:
+ * Laravel intenta grabar la sesión antes de renderizar cualquier página.
+ * El guard cubre las bases ya existentes que tenían la tabla creada a mano
+ * pero no tenían registrada la migración.
+ */
+return new class extends Migration
+{
+    public function up(): void
+    {
+        if (Schema::hasTable('sessions')) {
+            return;
+        }
+
+        Schema::create('sessions', function (Blueprint $table) {
+            $table->string('id')->primary();
+            $table->foreignId('user_id')->nullable()->index();
+            $table->string('ip_address', 45)->nullable();
+            $table->text('user_agent')->nullable();
+            $table->longText('payload');
+            $table->integer('last_activity')->index();
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::dropIfExists('sessions');
+    }
+};

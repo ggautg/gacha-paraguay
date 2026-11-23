@@ -4,7 +4,7 @@ Un gachapón web de figuras históricas del Paraguay. Cada tirada revela un retr
 
 Construido con **Laravel 13 + Inertia 3 + Vue 3 + Tailwind CSS 4**.
 
-Documentación detallada: [registro de cambios](CHANGELOG.md) · [arquitectura](docs/ARQUITECTURA.md).
+Documentación detallada: [registro de cambios](CHANGELOG.md) · [arquitectura](docs/ARQUITECTURA.md) · [guía para agentes](AGENTS.md).
 
 ---
 
@@ -42,6 +42,8 @@ La interfaz incluye un selector flotante (esquina inferior derecha) con nueve pa
 
 Cada paleta redefine los tokens de color (`night`, `bone`, `gold`), el degradado del fondo, la selección de texto, el color de `theme-color` y el del favicon. El tema elegido se guarda en `localStorage` con la clave `gacha-theme` y se aplica antes de mostrar la interfaz con un script en línea en `resources/views/app.blade.php` (sin parpadeo). Los metadatos de las paletas y la persistencia viven en `resources/js/lib/themes.js`.
 
+El importe de 1 SM no está duplicado en el frontend: `app.js` lo toma de la prop `gacha.salary.amount` (que sale de `config/gachapon.php`) y lo pasa a `lib/rarity.js`. Si cambia el decreto, alcanza con editar la configuración.
+
 ## Stack
 
 | Capa | Tecnología |
@@ -73,6 +75,7 @@ php artisan key:generate
 # Base de datos MySQL
 mysql -u root -p -e "CREATE DATABASE gacha_paraguay CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci"
 # Configurá DB_DATABASE, DB_USERNAME y DB_PASSWORD en .env
+# En esta máquina ya quedó configurada con la credencial indicada; no se versiona.
 php artisan migrate
 
 # Enlace público para los retratos
@@ -131,9 +134,13 @@ app/
   Support/GachaPresenter.php              # forma de los datos para Vue
 config/gachapon.php                       # plantel + economía + probabilidades
 resources/
-  css/app.css                             # tokens, 9 paletas, máquina y animaciones
-  js/pages/Home.vue                       # máquina, probabilidades, vitrina
-  js/pages/Album.vue                      # grilla, filtros, buscador, modal
+  css/app.css                             # tokens, 9 paletas y animaciones suaves
+  js/pages/Home.vue                       # coordina tiradas, bonificación y paneles
+  js/pages/Album.vue                      # coordina filtros, búsqueda y grilla
+  js/Layouts/AppLayout.vue                # header, nav, pie y avisos
+  js/Components/GachaMachine.vue          # máquina, palanca y estado accesible
+  js/Components/PullControls.vue          # botones ×1/×10, precios y errores
+  js/Components/BonusClaim.vue            # bonificación con cuenta regresiva
   js/Components/CharacterPortrait.vue     # imagen con respaldo ante URLs rotas
   js/Components/RarityBadge.vue           # color + etiqueta + estrellas
   js/Components/CloseButton.vue           # cierre uniforme de overlays
@@ -143,10 +150,19 @@ resources/
   js/Components/StatCard.vue              # tarjetas de estadísticas
   js/Components/PullReveal.vue            # overlay de revelado
   js/Components/ThemePicker.vue           # selector flotante de paletas
+  js/Components/ToastNotice.vue           # aviso global con cierre manual
+  js/Components/RarityRates.vue           # probabilidades y garantía
+  js/Components/ShowcasePanel.vue         # vitrina y saldo
+  js/Components/RecentPullsPanel.vue      # últimas tiradas
+  js/Components/CollectionFilters.vue     # filtros de la colección
+  js/Components/CollectionProgress.vue    # anillo de progreso
   js/composables/useDismissableOverlay.js # Escape + bloqueo de scroll
+  js/lib/rarity.js                        # rarezas y formato de sueldos
   js/lib/themes.js                        # metadatos y persistencia del tema
+AGENTS.md                                 # reglas para agentes
 CHANGELOG.md                              # cada cambio explicado
 docs/ARQUITECTURA.md                      # mapa de capas y flujos
+database/migrations/0001_01_01_000003_create_sessions_table.php
 database/migrations/2026_10_23_000001_create_gachapon_tables.php
 tests/Feature/GachaTest.php               # 10 pruebas del flujo completo
 ```
@@ -155,9 +171,14 @@ tests/Feature/GachaTest.php               # 10 pruebas del flujo completo
 
 ```bash
 php artisan test
+npm run build
+npm audit
+git diff --check
 ```
 
 Cubren la carga de la home y la colección, cobro de sueldos, precio múltiple, devolución por duplicado, garantía, saldo insuficiente y bonificación diaria única.
+
+Estado verificado en la última revisión: **10 pruebas / 55 aserciones**, build de **649 módulos** y **0 vulnerabilidades** en `npm audit`. MySQL 8.0.35 quedó disponible con la base `gacha_paraguay`, `APP_KEY` generada, migraciones al día y el enlace de `storage` conectado. La contraseña local solo vive en `.env`.
 
 ## Créditos y licencia
 

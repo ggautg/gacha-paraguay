@@ -8,7 +8,9 @@ use App\Services\GachaService;
 use App\Support\Salary;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -84,27 +86,33 @@ class GachaController extends Controller
     }
 
     /**
-     * Acredita la bonificación de monedas respetando el cooldown del jugador.
+     * Acredita la bonificación respetando el cooldown del jugador.
      *
-     * canClaimBonus() decide en función de bonus_claimed_at y se persiste la marca
-     * de tiempo apenas se cobra: así una recarga o un doble clic no pueden otorgar
-     * la bonificación dos veces.
+     * La fila se bloquea con lockForUpdate() y la elegibilidad se vuelve a
+     * comprobar dentro de la transacción: sin ese bloqueo, dos peticiones
+     * simultáneas leerían "bonificación lista" y acreditarían el doble.
+     * canClaimBonus() se deriva de bonus_claimed_at, así que basta con grabar
+     * esa marca en el mismo bloqueo para que un doble clic no cobre dos veces.
      */
     public function bonus(Request $request): RedirectResponse
     {
-        $player = $this->player($request);
-
-        if (! $player->canClaimBonus()) {
-            return back()->withErrors([
-                'bonus' => 'La bonificación todavía no está lista.',
-            ]);
-        }
-
         $coins = (int) config('gachapon.economy.bonus_coins');
 
-        $player->coins += $coins;
-        $player->bonus_claimed_at = now();
-        $player->save();
+        DB::transaction(function () use ($request, $coins) {
+            $player = Player::query()
+                ->lockForUpdate()
+                ->findOrFail($this->player($request)->getKey());
+
+            if (! $player->canClaimBonus()) {
+                throw ValidationException::withMessages([
+                    'bonus' => 'La bonificación todavía no está lista.',
+                ]);
+            }
+
+            $player->increment('coins', $coins);
+            $player->bonus_claimed_at = now();
+            $player->save();
+        });
 
         return back()->with('message', '¡Recibiste '.Salary::format($coins).' ('.Salary::guaranies($coins).')!');
     }

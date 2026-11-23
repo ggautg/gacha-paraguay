@@ -2,49 +2,20 @@
 /**
  * Estructura común de las dos pantallas (máquina y colección).
  *
- * concentra la franja de bandera, la navegación, el saldo, el selector de
- * temas, el pie y los avisos. El toast es `role="status"` para que un lector
- * de pantalla anuncie la bonificación reclamada, pero también se puede cerrar
- * a mano: el temporizador de 4 segundos era demasiado corto para leerlo con
- * calma. Limpiar el timer al cerrar evita que un toast nuevo se apague antes
- * de tiempo.
+ * Concentra la franja de bandera, la navegación, el saldo, el selector de
+ * temas, el pie y los avisos. El toast se extrajo a ToastNotice: aquí solo se
+ * coloca en el árbol, sin temporizadores ni escuchas de props compartidas.
  */
 import { Link, usePage } from '@inertiajs/vue3';
-import { computed, onBeforeUnmount, ref, watch } from 'vue';
+import { computed } from 'vue';
 import CoinChip from '../Components/CoinChip.vue';
-import CloseButton from '../Components/CloseButton.vue';
 import ProgressBar from '../Components/ProgressBar.vue';
 import ThemePicker from '../Components/ThemePicker.vue';
+import ToastNotice from '../Components/ToastNotice.vue';
 
 const page = usePage();
 const player = computed(() => page.props.player);
 const url = computed(() => page.url);
-
-const toast = ref(null);
-let toastTimer = null;
-
-function dismissToast() {
-    toast.value = null;
-    clearTimeout(toastTimer);
-}
-
-watch(
-    () => page.props.flash?.message,
-    (message) => {
-        if (!message) {
-            return;
-        }
-
-        toast.value = message;
-        clearTimeout(toastTimer);
-        toastTimer = setTimeout(() => {
-            toast.value = null;
-        }, 4000);
-    },
-    { immediate: true },
-);
-
-onBeforeUnmount(() => clearTimeout(toastTimer));
 
 function isActive(href) {
     return href === '/' ? url.value === '/' : url.value.startsWith(href);
@@ -121,31 +92,6 @@ function isActive(href) {
         </footer>
 
         <ThemePicker />
-
-        <Transition name="toast">
-            <div
-                v-if="toast"
-                class="fixed bottom-20 left-1/2 z-50 flex max-w-[calc(100vw-2rem)] -translate-x-1/2 items-center gap-3 rounded-full border border-gold-400/40 bg-night-900/95 py-2 pl-5 pr-2 text-sm font-medium text-gold-200 backdrop-blur sm:bottom-5"
-                style="box-shadow: var(--panel-shadow)"
-                role="status"
-                aria-live="polite"
-            >
-                <span>{{ toast }}</span>
-                <CloseButton size="sm" label="Cerrar aviso" @click="dismissToast" />
-            </div>
-        </Transition>
+        <ToastNotice />
     </div>
 </template>
-
-<style scoped>
-.toast-enter-active,
-.toast-leave-active {
-    transition: opacity 0.25s ease, transform 0.25s ease;
-}
-
-.toast-enter-from,
-.toast-leave-to {
-    opacity: 0;
-    transform: translate(-50%, 12px);
-}
-</style>
