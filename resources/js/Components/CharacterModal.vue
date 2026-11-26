@@ -5,7 +5,7 @@
  * El componente mantiene un `visible` independiente de la prop para que la
  * transición de salida alcance a dibujarse: si se ocultara apenas la prop
  * pasa a `null`, el modal desaparecería de golpe. Escape y el bloqueo del
- * scroll los maneja `useDismissableOverlay`, igual que el revelado de tiradas.
+ * scroll y el foco los maneja `useDismissableOverlay`, igual que el revelado de tiradas.
  *
  * El extracto se muestra solo para personajes descubiertos: es la regla
  * anti-spoiler que mantiene la gracia de la colección.
@@ -25,6 +25,7 @@ const props = defineProps({
 const emit = defineEmits(['close']);
 
 const visible = ref(false);
+const dialog = ref(null);
 const meta = computed(() => (props.character ? rarityMeta(props.character.rarity) : rarityMeta(1)));
 const linkLabel = computed(() => {
     const url = props.character?.wiki_url ?? '';
@@ -55,13 +56,13 @@ watch(
     },
 );
 
-useDismissableOverlay({ active: () => Boolean(props.character), onEscape: close });
+useDismissableOverlay({ active: () => Boolean(props.character), onEscape: close, container: dialog });
 </script>
 
 <template>
     <Teleport to="body">
         <Transition name="modal">
-            <div v-if="visible && character" class="fixed inset-0 z-50 flex items-end justify-center p-0 sm:items-center sm:p-6" role="dialog" aria-modal="true" :aria-label="`Detalle de ${character.name}`">
+            <div v-if="visible && character" ref="dialog" tabindex="-1" class="fixed inset-0 z-50 flex items-end justify-center p-0 sm:items-center sm:p-6" role="dialog" aria-modal="true" :aria-label="`Detalle de ${character.name}`">
                 <div class="absolute inset-0 bg-night-950/85 backdrop-blur-md" @click="close" />
 
                 <div

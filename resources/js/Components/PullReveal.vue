@@ -9,7 +9,7 @@
  * cerrara a mitad de la petición, el `watch` de Home volvería a abrirlo al
  * llegar la respuesta y el usuario vería un parpadeo confuso.
  */
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import { formatCoins, rarityMeta } from '../lib/rarity';
 import { useDismissableOverlay } from '../composables/useDismissableOverlay';
 import CharacterPortrait from './CharacterPortrait.vue';
@@ -25,6 +25,7 @@ const props = defineProps({
 
 const emit = defineEmits(['close', 'again']);
 
+const dialog = ref(null);
 const results = computed(() => props.pull?.results ?? []);
 const summary = computed(() => props.pull?.summary ?? {});
 const isMulti = computed(() => results.value.length > 1);
@@ -44,13 +45,13 @@ function again() {
     emit('again');
 }
 
-// Escape y bloqueo de scroll delegados al composable compartido.
-useDismissableOverlay({ active: () => true, onEscape: close });
+// Escape, scroll y foco confinado delegados al composable compartido.
+useDismissableOverlay({ active: () => true, onEscape: close, container: dialog });
 </script>
 
 <template>
     <Teleport to="body">
-        <div class="fixed inset-0 z-50 flex flex-col bg-night-950/92 backdrop-blur-xl" role="dialog" aria-modal="true" aria-label="Resultado de la tirada">
+        <div ref="dialog" tabindex="-1" class="fixed inset-0 z-50 flex flex-col bg-night-950/92 backdrop-blur-xl" role="dialog" aria-modal="true" aria-label="Resultado de la tirada">
             <div class="pointer-events-none absolute inset-0 overflow-hidden">
                 <div class="absolute left-1/2 top-0 h-[420px] w-[720px] -translate-x-1/2 rounded-full bg-gold-400/10 blur-[120px]" />
                 <div class="absolute bottom-0 right-0 h-[320px] w-[420px] rounded-full bg-flag-blue/15 blur-[120px]" />

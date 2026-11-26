@@ -216,3 +216,16 @@ Componentes nuevos: `GachaMachine.vue`, `PullControls.vue`, `BonusClaim.vue`, `R
 - `php artisan migrate --force`: migración de `sessions` aplicada; `php artisan storage:link`: enlace conectado.
 - `npm audit`: 0 vulnerabilidades.
 - `git diff --check`: sin errores de whitespace.
+
+## Remediación de CFG-02 y FE-01 (26 de noviembre de 2026)
+
+- **CFG-02:** la aplicación dejó de conectarse con `root`. Se creó `gacha_app` con `SELECT/INSERT/UPDATE/DELETE` únicamente en `gacha_paraguay.*` y `gacha_paraguay_test.*`, sin `GRANT OPTION`; la credencial se rotó y vive solo en `.env`, ignorado por Git. `.env.example` y el README ahora parten de ese usuario y documentan `gacha_migrate` (con DDL) para las migraciones. `SHOW GRANTS`, `migrate:status` y una escritura revertida en transacción confirman que el usuario alcanza para operar y que no puede crear tablas.
+- **FE-01:** `useDismissableOverlay` acepta la raíz del diálogo, guarda el elemento que lo abrió, enfoca su primer control visible, confina `Tab` y `Shift+Tab` entre esos controles y restaura el foco al cerrar o desmontar. `PullReveal` y `CharacterModal` pasan `container` y marcan su raíz con `tabindex="-1"`. `ThemePicker` se dejó fuera porque es un popover, no un diálogo `aria-modal`.
+- Se actualizaron `docs/ARQUITECTURA.md` y el README para que el mapa técnico y el arranque coincidan con el código.
+
+### Verificación de esta remediación
+
+- `php artisan test`: 10 pruebas / 55 aserciones, OK.
+- `npm run build`: 649 módulos, OK.
+- `php -l app/Http/Controllers/GachaController.php` y `git diff --check`: sin errores.
+- Comprobación aislada del focus trap con un DOM falso: foco inicial, envoltura de `Tab`/`Shift+Tab`, entrada desde fuera y restauración al cerrar, OK. No se hizo prueba en navegador real.

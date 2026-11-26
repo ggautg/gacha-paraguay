@@ -72,10 +72,10 @@ composer install
 cp .env.example .env
 php artisan key:generate
 
-# Base de datos MySQL
-mysql -u root -p -e "CREATE DATABASE gacha_paraguay CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci"
-# Configurá DB_DATABASE, DB_USERNAME y DB_PASSWORD en .env
-# En esta máquina ya quedó configurada con la credencial indicada; no se versiona.
+# Base de datos MySQL: la app corre con gacha_app (solo DML); migrate usa otro usuario
+mysql -u root -p -e "CREATE DATABASE IF NOT EXISTS gacha_paraguay CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci; CREATE USER IF NOT EXISTS 'gacha_app'@'localhost' IDENTIFIED BY '<secreto>'; GRANT SELECT, INSERT, UPDATE, DELETE ON gacha_paraguay.* TO 'gacha_app'@'localhost'; CREATE USER IF NOT EXISTS 'gacha_migrate'@'localhost' IDENTIFIED BY '<otro-secreto>'; GRANT ALL PRIVILEGES ON gacha_paraguay.* TO 'gacha_migrate'@'localhost';"
+# DB_USERNAME ya viene como gacha_app en .env.example; poné su secreto en DB_PASSWORD.
+# Para migrar, configurá DB_USERNAME/DB_PASSWORD con gacha_migrate; la app sigue con gacha_app.
 php artisan migrate
 
 # Enlace público para los retratos
@@ -178,7 +178,7 @@ git diff --check
 
 Cubren la carga de la home y la colección, cobro de sueldos, precio múltiple, devolución por duplicado, garantía, saldo insuficiente y bonificación diaria única.
 
-Estado verificado en la última revisión: **10 pruebas / 55 aserciones**, build de **649 módulos** y **0 vulnerabilidades** en `npm audit`. MySQL 8.0.35 quedó disponible con la base `gacha_paraguay`, `APP_KEY` generada, migraciones al día y el enlace de `storage` conectado. La contraseña local solo vive en `.env`.
+Estado verificado en la última revisión: **10 pruebas / 55 aserciones**, build de **649 módulos** y **0 vulnerabilidades** en `npm audit`. MySQL 8.0.35 quedó disponible con la base `gacha_paraguay`, `APP_KEY` generada, migraciones al día y el enlace de `storage` conectado. La app corre con `gacha_app` (solo `SELECT/INSERT/UPDATE/DELETE` en las bases del proyecto); su contraseña solo vive en `.env`.
 
 ## Créditos y licencia
 

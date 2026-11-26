@@ -122,9 +122,10 @@ Todos los archivos tienen docblock de clase y de métodos públicos.
 
 - cierre con **Escape** solo cuando el overlay está activo;
 - bloqueo del scroll del documento con `overflow: hidden`, guardando el valor previo;
+- **focus trap**: guarda el elemento que abrió el diálogo, enfoca su primer control, confina `Tab` entre los controles visibles y devuelve el foco al cerrar o desmontar;
 - limpieza de listeners y del scroll al desmontar.
 
-Lo usan `PullReveal` y `CharacterModal`. Antes cada uno repetía los listeners y podía dejar el scroll trabado si se cerraba a mitad de una petición.
+Lo usan `PullReveal` y `CharacterModal`, que pasan la raíz del diálogo en `container` y le dan `tabindex="-1"` como destino de foco vacío. Antes cada uno repetía los listeners, podía dejar el scroll trabado si se cerraba a mitad de una petición y anunciaba `aria-modal` sin confinar el foco. `ThemePicker` no usa el trap: es un popover, no un diálogo modal.
 
 ### Librerías
 
@@ -150,7 +151,7 @@ Lo usan `PullReveal` y `CharacterModal`. Antes cada uno repetía los listeners y
 
 ## Base de datos y configuración
 
-- MySQL 8.0.35, base `gacha_paraguay` (utf8mb4). El entorno local usa usuario `root` con la credencial definida en `.env` (archivo ignorado por Git).
+- MySQL 8.0.35, base `gacha_paraguay` (utf8mb4). La aplicación usa `gacha_app`, con `SELECT/INSERT/UPDATE/DELETE` solo en `gacha_paraguay.*` y `gacha_paraguay_test.*`, sin `GRANT OPTION`; su credencial vive únicamente en `.env` (ignorado por Git). `gacha_migrate` es un usuario aparte, con DDL, reservado para `php artisan migrate` y documentado en el README. Las migraciones ya aplicadas no se reescriben.
 - `SESSION_DRIVER=database`, `CACHE_STORE=database` y `QUEUE_CONNECTION=database` exigen las tablas `sessions`, `cache` y `jobs`. La tabla `sessions` antes no tenía migración: se agregó `0001_01_01_000003_create_sessions_table.php` con guard para bases ya existentes.
 - `config/gachapon.php` es la fuente de verdad del plantel (84 figuras), economía (precios, bonificación, reembolsos), salario, probabilidades, `pity` y tamaño de la tirada múltiple. El navegador recibe esos valores en la prop compartida `gacha`.
 - Si se cambia un nombre o rol en la configuración, hay que reflejarlo en la tabla `characters` (el comando de importación o una actualización puntual). En esta revisión se sincronizaron Víctor Pecci, Keraná y Luisón.
